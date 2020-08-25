@@ -1,4 +1,4 @@
-import "https://deno.land/x/dotenv/load.ts";
+import { env } from "../src/env.ts";
 
 export namespace dirty {
   export namespace API {
@@ -6,8 +6,8 @@ export namespace dirty {
       const init: RequestInit = {
         method: "GET",
         headers: {
-          "X-Futuware-UID": <string> Deno.env.get("UID"),
-          "X-Futuware-SID": <string> Deno.env.get("SID"),
+          "X-Futuware-UID": env("UID"),
+          "X-Futuware-SID": env("SID"),
         },
       };
       return fetch(`https://d3.ru/api/${url}`, init);

@@ -48,7 +48,7 @@ export interface Post {
   user: User;
 }
 
-export interface KarmaVote {
+export interface Vote {
   vote: number;
   changed: number;
   user: User;
@@ -62,9 +62,9 @@ export interface PostsResponse extends PagedResponse {
   posts: Post[];
 }
 
-export interface KarmaResponse extends PagedResponse {
-  upvotes: KarmaVote[];
-  downvotes: KarmaVote[];
+export interface VotesResponse extends PagedResponse {
+  upvotes: Vote[];
+  downvotes: Vote[];
 }
 
 export interface PagedResponse {

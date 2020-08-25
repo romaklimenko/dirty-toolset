@@ -1,11 +1,11 @@
 import {
   Comment,
   CommentsResponse,
-  KarmaVote,
-  KarmaResponse,
   PagedResponse,
   Post,
   PostsResponse,
+  Vote,
+  VotesResponse,
 } from "./types.ts";
 import { dirty } from "./rest.ts";
 
@@ -41,38 +41,54 @@ function pageIterator<TResponse extends PagedResponse, TEntity>(
   }();
 }
 
-export function comments(username: string) {
+export function comments(userName: string) {
   return pageIterator<CommentsResponse, Comment>({
-    url: `users/${username}/comments`,
+    url: `users/${userName}/comments`,
     perPage: 42,
     get: dirty.API.get,
     getEntities: (response: CommentsResponse) => response.comments,
   });
 }
 
-export function posts(username: string) {
+export function posts(userName: string) {
   return pageIterator<PostsResponse, Post>({
-    url: `users/${username}/posts`,
+    url: `users/${userName}/posts`,
     perPage: 42,
     get: dirty.API.get,
     getEntities: (response: PostsResponse) => response.posts,
   });
 }
 
-export function karma(username: string) {
-  return pageIterator<KarmaResponse, KarmaVote>({
-    url: `users/${username}/votes`,
+const getVotes = (response: VotesResponse) =>
+  (response.upvotes || []).concat(response.downvotes || []);
+
+export function karma(userName: string) {
+  return pageIterator<VotesResponse, Vote>({
+    url: `users/${userName}/votes`,
     perPage: 210,
     get: dirty.API.get,
-    getEntities: (response: KarmaResponse) =>
-      response.upvotes.concat(response.downvotes),
+    getEntities: getVotes,
+  });
+}
+
+export function postVotes(id: number) {
+  return pageIterator<VotesResponse, Vote>({
+    url: `posts/${id}/votes`,
+    perPage: 210,
+    get: dirty.API.get,
+    getEntities: getVotes,
+  });
+}
+
+export function commentVotes(id: number) {
+  return pageIterator<VotesResponse, Vote>({
+    url: `comments/${id}/votes`,
+    perPage: 210,
+    get: dirty.API.get,
+    getEntities: getVotes,
   });
 }
 
 // TODO: domains
 // TODO: domainPosts
-
 // TODO: postComments
-
-// TODO: postVotes
-// TODO: commentVotes

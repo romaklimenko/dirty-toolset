@@ -6,6 +6,5 @@ integration:
 unit:
 	deno test --allow-net --allow-read --allow-env test/unit
 
-# run all tests
-test:
-	deno test --allow-net --allow-read --allow-env
+votes:
+	deno run --allow-net --allow-read --allow-write --allow-env tools/votes.ts $(username)
