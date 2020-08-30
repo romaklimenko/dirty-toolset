@@ -1,0 +1,66 @@
+import {
+  MongoClient,
+} from "https://deno.land/x/mongo@v0.11.1/mod.ts";
+
+import { UserSchema, KarmaSchema } from "../src/types.ts";
+import { saveJSON } from "../src/fs.ts";
+
+const client = new MongoClient();
+client.connectWithUri("mongodb://localhost:27017");
+
+const db = client.database("dirty");
+const usersCollection = db.collection<UserSchema>("users");
+const karmaCollection = db.collection<KarmaSchema>("karma");
+
+const users: UserSchema[] = await usersCollection
+  .aggregate(
+    [
+      { $sort: { "dude.id": -1 } },
+    ],
+  );
+
+const usersResult: any[] = [];
+
+async function cacheKarma(login: string) {
+  const votes: KarmaSchema[] = await karmaCollection
+    .aggregate(
+      [
+        { $match: { from: login } },
+        { $sort: { "changed": 1 } },
+      ],
+    );
+
+  if (votes.length === 0) {
+    return;
+  }
+
+  const result = votes.map((v: KarmaSchema) => {
+    return {
+      from: v.from,
+      to: v.to,
+      changed: v.changed,
+      vote: v.vote,
+      deleted: v.deleted,
+    };
+  });
+
+  await saveJSON(result, `cache/${login.toLowerCase()}.json`);
+}
+
+for (const user of users) {
+  console.log(user.dude.id, user.dude.login);
+  usersResult.push({
+    id: user.dude.id,
+    login: user.dude.login,
+    gender: user.dude.gender,
+    karma: user.dude.karma,
+    posts_count: user.posts_count,
+    comments_count: user.comments_count,
+    subscribers_count: user.subscribers_count,
+    active: user.dude.active,
+    deleted: user.dude.deleted,
+  });
+  await cacheKarma(user.dude.login);
+}
+
+await saveJSON(usersResult, "data/users.json");

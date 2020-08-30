@@ -1,3 +1,7 @@
+import {
+  ObjectId,
+} from "https://deno.land/x/mongo@v0.11.1/mod.ts";
+
 export type Gender = "male" | "female";
 
 export interface Domain {
@@ -67,9 +71,49 @@ export interface VotesResponse extends PagedResponse {
   downvotes: Vote[];
 }
 
+export interface UserResponse {
+  status: "OK" | "ERR";
+  subscribers_count: number;
+  dude: {
+    deleted: number;
+    gender: string;
+    subscribers_count: number;
+    karma: number;
+    login: string;
+    active: number;
+    id: number;
+  };
+  comments_count: number;
+  posts_count: number;
+}
+
+export interface ResponseError {
+  code: string;
+}
+
+export interface UserErrorResponse {
+  status: "ERR";
+  errors: ResponseError[];
+}
+
 export interface PagedResponse {
   item_count: number;
   page_count: number;
   page: number;
   per_page: number;
+}
+
+export interface MongoDocument {
+  _id?: ObjectId;
+}
+
+export interface UserSchema extends MongoDocument, UserResponse {
+}
+
+export interface KarmaSchema extends MongoDocument {
+  from: string;
+  to: string;
+  changed: number;
+  vote: number;
+  deleted: boolean;
 }
