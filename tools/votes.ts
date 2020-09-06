@@ -126,4 +126,4 @@ function addVoteToObject(vote: Vote) {
 
   karma.sort((a, b) => a.changed > b.changed ? -1 : 1);
   await saveJSON(karma, `${process.env.DATA}/${userName}-karma.json`);
-})();
+})().catch(reason => console.error(reason));

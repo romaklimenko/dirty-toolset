@@ -1,6 +1,7 @@
 import { UserResponse, UserErrorResponse } from "./types";
 
-const fetch = require('node-fetch');
+const fetch = require("node-fetch");
+const FormData = require("form-data");
 
 require("dotenv").config();
 
@@ -14,7 +15,7 @@ export namespace dirty {
           "X-Futuware-SID": process.env.SID,
         },
       };
-      return fetch(`https://d3.ru/api/${url}`, init);
+      return fetch(encodeURI(`https://d3.ru/api/${url}`), init);
     }
   }
 

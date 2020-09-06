@@ -14,8 +14,7 @@ type EntityGetter<TResponse, TEntity> = (response: TResponse) => TEntity[];
 interface PageIteratorOptions<TResponse extends PagedResponse, TEntity> {
   url: string;
   perPage: number;
-  get: (url: string) => Promise<Response>;
-  getEntities: EntityGetter<TResponse, TEntity>;
+  entitiesGetter: EntityGetter<TResponse, TEntity>;
 }
 
 function pageIterator<TResponse extends PagedResponse, TEntity>(
@@ -27,12 +26,12 @@ function pageIterator<TResponse extends PagedResponse, TEntity>(
     let page = 1;
 
     while (entities.length === 0 && page <= pageCount) {
-      const response = await options.get(
+      const response = await dirty.API.get(
         `${options.url}?per_page=${options.perPage}&page=${page++}`,
       );
       const json = <TResponse> await response.json();
       pageCount = json.page_count;
-      entities.push(...options.getEntities(json));
+      entities.push(...options.entitiesGetter(json));
 
       while (entities.length > 0) {
         yield < TEntity > entities.shift();
@@ -45,8 +44,7 @@ export function comments(userName: string) {
   return pageIterator<CommentsResponse, Comment>({
     url: `users/${userName}/comments`,
     perPage: 42,
-    get: dirty.API.get,
-    getEntities: (response: CommentsResponse) => response.comments,
+    entitiesGetter: (response: CommentsResponse) => response.comments,
   });
 }
 
@@ -54,8 +52,7 @@ export function posts(userName: string) {
   return pageIterator<PostsResponse, Post>({
     url: `users/${userName}/posts`,
     perPage: 42,
-    get: dirty.API.get,
-    getEntities: (response: PostsResponse) => response.posts,
+    entitiesGetter: (response: PostsResponse) => response.posts,
   });
 }
 
@@ -66,8 +63,7 @@ export function karma(userName: string) {
   return pageIterator<VotesResponse, Vote>({
     url: `users/${userName}/votes`,
     perPage: 210,
-    get: dirty.API.get,
-    getEntities: getVotes,
+    entitiesGetter: getVotes,
   });
 }
 
@@ -75,8 +71,7 @@ export function postVotes(id: number) {
   return pageIterator<VotesResponse, Vote>({
     url: `posts/${id}/votes`,
     perPage: 210,
-    get: dirty.API.get,
-    getEntities: getVotes,
+    entitiesGetter: getVotes,
   });
 }
 
@@ -84,8 +79,7 @@ export function commentVotes(id: number) {
   return pageIterator<VotesResponse, Vote>({
     url: `comments/${id}/votes`,
     perPage: 210,
-    get: dirty.API.get,
-    getEntities: getVotes,
+    entitiesGetter: getVotes,
   });
 }
 

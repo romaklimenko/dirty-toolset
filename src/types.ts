@@ -1,6 +1,4 @@
-import {
-  ObjectId,
-} from "https://deno.land/x/mongo@v0.11.1/mod.ts";
+import { ObjectId } from "mongodb";
 
 export type Gender = "male" | "female";
 
