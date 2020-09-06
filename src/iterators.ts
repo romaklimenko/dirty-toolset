@@ -6,8 +6,8 @@ import {
   PostsResponse,
   Vote,
   VotesResponse,
-} from "./types.ts";
-import { dirty } from "./rest.ts";
+} from "./types";
+import { dirty } from "./rest";
 
 type EntityGetter<TResponse, TEntity> = (response: TResponse) => TEntity[];
 

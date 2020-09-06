@@ -1,6 +1,7 @@
+import { promises } from "fs";
+
 export async function saveJSON(object: {}, path: string) {
-  await Deno.writeFile(
+  await promises.writeFile(
     path,
-    new TextEncoder().encode(JSON.stringify(object, null, 1)),
-  );
+    new TextEncoder().encode(JSON.stringify(object, null, 1)));
 }

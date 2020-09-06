@@ -1,3 +1,4 @@
 .env
 cache
 dirty.json
+node_modules

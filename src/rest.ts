@@ -1,5 +1,8 @@
-import { env } from "../src/env.ts";
-import { UserResponse, UserErrorResponse } from "./types.ts";
+import { UserResponse, UserErrorResponse } from "./types";
+
+const fetch = require('node-fetch');
+
+require("dotenv").config();
 
 export namespace dirty {
   export namespace API {
@@ -7,8 +10,8 @@ export namespace dirty {
       const init: RequestInit = {
         method: "GET",
         headers: {
-          "X-Futuware-UID": env("UID"),
-          "X-Futuware-SID": env("SID"),
+          "X-Futuware-UID": process.env.UID,
+          "X-Futuware-SID": process.env.SID,
         },
       };
       return fetch(`https://d3.ru/api/${url}`, init);
@@ -25,8 +28,8 @@ export namespace dirty {
       const init: RequestInit = {
         method: "POST",
         headers: {
-          "X-Futuware-UID": env("UID"),
-          "X-Futuware-SID": env("SID"),
+          "X-Futuware-UID": process.env.UID,
+          "X-Futuware-SID": process.env.SID,
         },
         body: formdata,
       };
