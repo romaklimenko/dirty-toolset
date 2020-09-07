@@ -1,6 +1,6 @@
-import { ObjectId } from "mongodb";
+import {ObjectId} from 'mongodb';
 
-export type Gender = "male" | "female";
+export type Gender = 'male' | 'female';
 
 export interface Domain {
   id: number;
@@ -70,7 +70,7 @@ export interface VotesResponse extends PagedResponse {
 }
 
 export interface UserResponse {
-  status: "OK" | "ERR";
+  status: 'OK' | 'ERR';
   subscribers_count: number;
   dude: {
     deleted: number;
@@ -90,7 +90,7 @@ export interface ResponseError {
 }
 
 export interface UserErrorResponse {
-  status: "ERR";
+  status: 'ERR';
   errors: ResponseError[];
 }
 
@@ -105,8 +105,7 @@ export interface MongoDocument {
   _id?: ObjectId;
 }
 
-export interface UserSchema extends MongoDocument, UserResponse {
-}
+export interface UserSchema extends MongoDocument, UserResponse {}
 
 export interface KarmaSchema extends MongoDocument {
   from: string;

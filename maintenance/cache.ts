@@ -1,32 +1,25 @@
-import { UserSchema, KarmaSchema } from "../src/types";
-import { saveJSON } from "../src/fs";
-import { MongoClient } from "mongodb";
+import {UserSchema, KarmaSchema} from '../src/types';
+import {save} from '../src/fs';
+import {MongoClient} from 'mongodb';
 
 (async function () {
-  const client = new MongoClient("mongodb://localhost:27017");
+  const client = new MongoClient('mongodb://localhost:27017');
   await client.connect();
 
-  const db = client.db("dirty");
-  const usersCollection = db.collection<UserSchema>("users");
-  const karmaCollection = db.collection<KarmaSchema>("karma");
+  const db = client.db('dirty');
+  const usersCollection = db.collection<UserSchema>('users');
+  const karmaCollection = db.collection<KarmaSchema>('karma');
 
   const users: UserSchema[] = await usersCollection
-    .aggregate(
-      [
-        { $sort: { "dude.id": -1 } },
-      ],
-    ).toArray();
+    .aggregate([{$sort: {'dude.id': -1}}])
+    .toArray();
 
-  const usersResult: any[] = [];
+  const usersResult: unknown[] = [];
 
   async function cacheKarma(login: string) {
     const votes: KarmaSchema[] = await karmaCollection
-      .aggregate(
-        [
-          { $match: { from: login } },
-          { $sort: { "changed": 1 } },
-        ],
-      ).toArray();
+      .aggregate([{$match: {from: login}}, {$sort: {changed: 1}}])
+      .toArray();
 
     if (votes.length === 0) {
       return;
@@ -42,7 +35,7 @@ import { MongoClient } from "mongodb";
       };
     });
 
-    await saveJSON(result, `cache/${login.toLowerCase()}.json`);
+    await save(result, `cache/${login.toLowerCase()}.json`);
   }
 
   for (const user of users) {
@@ -61,5 +54,5 @@ import { MongoClient } from "mongodb";
     await cacheKarma(user.dude.login);
   }
 
-  await saveJSON(usersResult, "data/users.json");
+  await save(usersResult, 'data/users.json');
 })().catch(reason => console.log(reason));

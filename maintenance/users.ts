@@ -1,31 +1,31 @@
-import { UserSchema, KarmaSchema, UserErrorResponse } from "../src/types";
-import { dirty } from "../src/rest";
-import { karma } from "../src/iterators";
-import { MongoClient } from "mongodb";
+import {UserSchema, KarmaSchema, UserErrorResponse} from '../src/types';
+import {getUser} from '../src/ajax';
+import {karma} from '../src/iterators';
+import {MongoClient} from 'mongodb';
 
 const fromId: number = parseInt(process.argv[2], 10) || 1;
 const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
 
 (async function (fromId: number, toId: number) {
-  const client = new MongoClient("mongodb://localhost:27017");
-  await client.connect()
+  const client = new MongoClient('mongodb://localhost:27017');
+  await client.connect();
 
-  const db = client.db("dirty");
-  const users = db.collection<UserSchema>("users1");
-  const karmas = db.collection<KarmaSchema>("karma1");
+  const db = client.db('dirty');
+  const users = db.collection<UserSchema>('users');
+  const karmas = db.collection<KarmaSchema>('karma');
 
   const maxErrors = 1000;
   let errortsLeft = maxErrors;
 
   for (let userId = fromId; userId <= toId && errortsLeft > 0; userId++) {
-    const response = await dirty.AJAX.getUser(userId);
-    if (response.status === "OK") {
+    const response = await getUser(userId);
+    if (response.status === 'OK') {
       errortsLeft = maxErrors;
       console.log(userId, response.dude.login);
-      if (response.dude.login === "") {
+      if (response.dude.login === '') {
         continue;
       }
-      for await (let vote of karma(response.dude.login)) {
+      for await (const vote of karma(response.dude.login)) {
         try {
           const doc: KarmaSchema = {
             from: vote.user.login,
@@ -35,13 +35,16 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
             deleted: false,
           };
 
-          await karmas.updateMany({
-            from: { $eq: doc.from },
-            to: { $eq: doc.to },
-            vote: { $eq: doc.vote },
-            changed: { $ne: doc.changed },
-            deleted: { $eq: false },
-          }, { $set: { deleted: true } });
+          await karmas.updateMany(
+            {
+              from: {$eq: doc.from},
+              to: {$eq: doc.to},
+              vote: {$eq: doc.vote},
+              changed: {$ne: doc.changed},
+              deleted: {$eq: false},
+            },
+            {$set: {deleted: true}}
+          );
 
           await karmas.insertOne(doc);
         } catch (error) {
@@ -67,9 +70,9 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
     } else {
       console.log(
         userId,
-        (<UserErrorResponse> response).errors,
+        (response as UserErrorResponse).errors,
         --errortsLeft,
-        "errors left",
+        'errors left'
       );
     }
   }

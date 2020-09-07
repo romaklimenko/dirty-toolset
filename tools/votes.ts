@@ -1,16 +1,46 @@
-import * as Iterators from "../src/iterators";
-import { saveJSON } from "../src/fs";
-import { Vote } from "../src/types";
+import * as Iterators from '../src/iterators';
+import {save} from '../src/fs';
+import {Vote} from '../src/types';
 
-require("dotenv").config();
+require('dotenv').config();
 
 const userName = process.argv[2];
 
-const karma = <any[]> [];
-const votes = <any[]> [];
-const voters: any = {};
+interface VoteRecord {
+  title?: string;
+  body?: string;
+  changed: number;
+  date: string;
+  diff: number;
+  diffInDays: number;
+  domain: string;
+  type: 'comment' | 'post';
+  url: string;
+  vote: number;
+  voter: string;
+}
 
-const prettyVote = (vote: number) => vote > 0 ? `+${vote}` : `${vote}`;
+interface KarmaRecord {
+  changed: number;
+  date: Date;
+  voter: string;
+  vote: number;
+}
+
+interface VoterRecord {
+  voter: string;
+  downvotes: number;
+  downvotesCount: number;
+  upvotes: number;
+  upvotesCount: number;
+  sum: number;
+}
+
+const karma: KarmaRecord[] = [];
+const votes: VoteRecord[] = [];
+const voters: {[key: string]: VoterRecord} = {};
+
+const prettyVote = (vote: number) => (vote > 0 ? `+${vote}` : `${vote}`);
 
 function addVoteToObject(vote: Vote) {
   function insert() {
@@ -35,22 +65,23 @@ function addVoteToObject(vote: Vote) {
     voters[vote.user.login].sum += vote.vote;
   }
 
-  vote.user.login in voters ? update() : insert();
+  voters[vote.user.login] ? update() : insert();
 }
 
 (async function () {
-  for await (const comment of Iterators.comments(userName)) { // comments
+  for await (const comment of Iterators.comments(userName)) {
+    // comments
     for await (const vote of Iterators.commentVotes(comment.id)) {
-      const record = {
+      const record: VoteRecord = {
         body: comment.body.substring(0, 80),
         changed: vote.changed,
         date: new Date(vote.changed * 1000).toISOString(),
         diff: vote.changed - comment.created,
         diffInDays: Math.floor((vote.changed - comment.created) / 86400),
         domain: comment.domain.prefix,
-        type: "comment",
+        type: 'comment',
         url: `https://${
-          comment.domain.id === 1 ? "" : `${comment.domain.prefix}.`
+          comment.domain.id === 1 ? '' : `${comment.domain.prefix}.`
         }d3.ru/${comment.post.url_slug}-${comment.post.id}/#${comment.id}`,
         vote: vote.vote,
         voter: vote.user.login,
@@ -59,8 +90,8 @@ function addVoteToObject(vote: Vote) {
       console.log(
         record.date,
         prettyVote(vote.vote),
-        "в комментарий от",
-        vote.user.login,
+        'в комментарий от',
+        vote.user.login
       );
 
       votes.push(record);
@@ -69,18 +100,19 @@ function addVoteToObject(vote: Vote) {
     }
   }
 
-  for await (const post of Iterators.posts(userName)) { // posts
+  for await (const post of Iterators.posts(userName)) {
+    // posts
     for await (const vote of Iterators.postVotes(post.id)) {
-      const record = {
+      const record: VoteRecord = {
         title: post.title,
         changed: vote.changed,
         date: new Date(vote.changed * 1000).toISOString(),
         diff: vote.changed - post.created,
         diffInDays: Math.floor((vote.changed - post.created) / 86400),
         domain: post.domain.prefix,
-        type: "post",
+        type: 'post',
         url: `https://${
-          post.domain.id === 1 ? "" : `${post.domain.prefix}.`
+          post.domain.id === 1 ? '' : `${post.domain.prefix}.`
         }d3.ru/${post.url_slug}-${post.id}`,
         vote: vote.vote,
         voter: vote.user.login,
@@ -89,8 +121,8 @@ function addVoteToObject(vote: Vote) {
       console.log(
         record.date,
         prettyVote(vote.vote),
-        "в пост от",
-        vote.user.login,
+        'в пост от',
+        vote.user.login
       );
 
       votes.push(record);
@@ -99,22 +131,22 @@ function addVoteToObject(vote: Vote) {
     }
   }
 
-  votes.sort((a, b) => a.changed > b.changed ? -1 : 1);
-  await saveJSON(votes, `${process.env.DATA}/${userName}-votes.json`);
-  await saveJSON(
-    votes.filter((v) => v.diffInDays > 2),
-    `${process.env.DATA}/${userName}-delayed-votes.json`,
+  votes.sort((a, b) => (a.changed > b.changed ? -1 : 1));
+  await save(votes, `${process.env.DATA}/${userName}-votes.json`);
+  await save(
+    votes.filter(v => v.diffInDays > 2),
+    `${process.env.DATA}/${userName}-delayed-votes.json`
   );
 
   // voters
   const votersArray = Object.keys(voters)
-    .map((key) => voters[key])
-    .sort((a, b) => a.sum > b.sum ? -1 : 1);
-  await saveJSON(votersArray, `${process.env.DATA}/${userName}-voters.json`);
+    .map(key => voters[key])
+    .sort((a, b) => (a.sum > b.sum ? -1 : 1));
+  await save(votersArray, `${process.env.DATA}/${userName}-voters.json`);
 
   // karma
   for await (const vote of Iterators.karma(userName)) {
-    console.log(prettyVote(vote.vote), "в карму от", vote.user.login);
+    console.log(prettyVote(vote.vote), 'в карму от', vote.user.login);
 
     karma.push({
       changed: vote.changed,
@@ -124,6 +156,6 @@ function addVoteToObject(vote: Vote) {
     });
   }
 
-  karma.sort((a, b) => a.changed > b.changed ? -1 : 1);
-  await saveJSON(karma, `${process.env.DATA}/${userName}-karma.json`);
+  karma.sort((a, b) => (a.changed > b.changed ? -1 : 1));
+  await save(karma, `${process.env.DATA}/${userName}-karma.json`);
 })().catch(reason => console.error(reason));

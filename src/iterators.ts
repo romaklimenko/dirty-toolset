@@ -6,8 +6,8 @@ import {
   PostsResponse,
   Vote,
   VotesResponse,
-} from "./types";
-import { dirty } from "./rest";
+} from './types';
+import {get} from './api';
 
 type EntityGetter<TResponse, TEntity> = (response: TResponse) => TEntity[];
 
@@ -18,26 +18,26 @@ interface PageIteratorOptions<TResponse extends PagedResponse, TEntity> {
 }
 
 function pageIterator<TResponse extends PagedResponse, TEntity>(
-  options: PageIteratorOptions<TResponse, TEntity>,
-): AsyncGenerator<TEntity> {
-  return async function* (): AsyncGenerator<TEntity> {
+  options: PageIteratorOptions<TResponse, TEntity>
+) {
+  return (async function* () {
     const entities: TEntity[] = [];
     let pageCount = 1;
     let page = 1;
 
     while (entities.length === 0 && page <= pageCount) {
-      const response = await dirty.API.get(
-        `${options.url}?per_page=${options.perPage}&page=${page++}`,
+      const response = await get(
+        `${options.url}?per_page=${options.perPage}&page=${page++}`
       );
-      const json = <TResponse> await response.json();
+      const json = (await response.json()) as TResponse;
       pageCount = json.page_count;
       entities.push(...options.entitiesGetter(json));
 
       while (entities.length > 0) {
-        yield < TEntity > entities.shift();
+        yield entities.shift() as TEntity;
       }
     }
-  }();
+  })();
 }
 
 export function comments(userName: string) {

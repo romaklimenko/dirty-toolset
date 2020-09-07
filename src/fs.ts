@@ -1,7 +1,9 @@
-import { promises } from "fs";
+import {promises} from 'fs';
+import {TextEncoder} from 'util';
 
-export async function saveJSON(object: {}, path: string) {
+export async function save(object: {}, path: string) {
   await promises.writeFile(
     path,
-    new TextEncoder().encode(JSON.stringify(object, null, 1)));
+    new TextEncoder().encode(JSON.stringify(object, null, 1))
+  );
 }

@@ -1,3 +1,7 @@
+/* global describe */
+/* global test */
+/* global expect */
+
 import * as Iterators from './iterators';
 
 const userName = 'interesno';
@@ -48,8 +52,5 @@ describe('iterators', () => {
         expect(vote.vote).toBeDefined();
       }
     });
-  })
+  });
 });
-
-
-
