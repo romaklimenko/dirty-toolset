@@ -1,10 +1,9 @@
 import * as Iterators from '../src/iterators';
 import {save} from '../src/fs';
 import {Vote} from '../src/types';
+import * as prompt from 'async-prompt';
 
 require('dotenv').config();
-
-const userName = process.argv[2];
 
 interface VoteRecord {
   title?: string;
@@ -36,7 +35,6 @@ interface VoterRecord {
   sum: number;
 }
 
-const karma: KarmaRecord[] = [];
 const votes: VoteRecord[] = [];
 const voters: {[key: string]: VoterRecord} = {};
 
@@ -69,6 +67,7 @@ function addVoteToObject(vote: Vote) {
 }
 
 (async function () {
+  const userName = process.argv[2] ?? (await prompt('username: '));
   for await (const comment of Iterators.comments(userName)) {
     // comments
     for await (const vote of Iterators.commentVotes(comment.id)) {
@@ -143,19 +142,4 @@ function addVoteToObject(vote: Vote) {
     .map(key => voters[key])
     .sort((a, b) => (a.sum > b.sum ? -1 : 1));
   await save(votersArray, `${process.env.DATA}/${userName}-voters.json`);
-
-  // karma
-  for await (const vote of Iterators.karma(userName)) {
-    console.log(prettyVote(vote.vote), 'в карму от', vote.user.login);
-
-    karma.push({
-      changed: vote.changed,
-      date: new Date(vote.changed * 1000),
-      voter: vote.user.login,
-      vote: vote.vote,
-    });
-  }
-
-  karma.sort((a, b) => (a.changed > b.changed ? -1 : 1));
-  await save(karma, `${process.env.DATA}/${userName}-karma.json`);
 })().catch(reason => console.error(reason));

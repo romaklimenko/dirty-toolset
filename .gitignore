@@ -1,4 +1,5 @@
 .env
+build
 cache
 coverage
 dirty.json

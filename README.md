@@ -14,7 +14,7 @@
 SID=...
 UID=...
 CSRF=...
-DATA=/Users/mudhoney/Developer/dirty-private
+DATA=/local/data
 ```
 
 Заполните реальными значениями:
@@ -23,6 +23,31 @@ DATA=/Users/mudhoney/Developer/dirty-private
 
 ## Команды
 
-[Tools](/tools/README.md) - здесь инструменты, которые могут вам пригодиться.
+### Инструменты, которые могут вам пригодиться.
 
-[Maintenance](/maintenance/README.md) – эти инструменты вам вряд ли пригодятся.
+* Общие инструменты для работы с API d3.ru:
+
+* `npm run votes <username>` - сгенерировать JSON-отчеты по голосам в посты, комментарии и карму пользователя. Эта команда создаст следующие файлы в папке `DATA` (см. `.env`):
+  * `<username>-delayed-votes.json` - голоса в посты и комментарии пользователя, которые поставлены через три и более суток с момента написания соответствующего поста или комментария.
+  * `<username>-votes.json` - все голоса в посты и комментарии пользователя.
+  * `<username>-voters.json` - сводка по всем голосующим в посты и комментарии пользователя. Голосующие отсортированы по сумме всех голосов (с учётом веса голоса).
+
+* `npm run karma <username>` - сгенерировать JSON-отчет по голосам в карму пользователя. Эта команда создаст следующие файл в папке `DATA` (см. `.env`):
+  * `<username>-karma.json` - голоса в карму пользователя.
+
+### Разработка и поддержка
+
+- `npm run test` – тесты.
+- `npm run coverage` – code coverage.
+- `npm run check` – проверить код с помощью [Google TypeScript Style](https://github.com/google/gts).
+- `npm run fix` – исправить код с помощью [Google TypeScript Style](https://github.com/google/gts).
+
+### Эти инструменты вам вряд ли пригодятся.
+
+Эти инструменты могут пригодиться разве что как примеры.
+Их назначение – поддержка сайта https://romaklimenko.github.io/dirty и сбор данных для постов на https://dataisbeautiful.d3.ru/.
+
+
+* `npm run usersToDb <fromId> <toId>` – сохранить в mongo пользователей с id от `fromId` до `toId`. И голоса в их карму.
+* `npm run usersToJson.ts` – создать JSON-файлы со списком пользователей и JSON-файлы с исходящими голосами пользователя (по файлу на каждого пользователя).
+* `npm run uploadCache` – загрузить JSON-файлы с кармой в Google Cloud Storage.
