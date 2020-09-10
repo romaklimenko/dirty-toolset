@@ -9,7 +9,8 @@ interface VoteRecord {
   title?: string;
   body?: string;
   changed: number;
-  date: string;
+  created: string;
+  voted: string;
   diff: number;
   diffInDays: number;
   domain: string;
@@ -17,13 +18,6 @@ interface VoteRecord {
   url: string;
   vote: number;
   voter: string;
-}
-
-interface KarmaRecord {
-  changed: number;
-  date: Date;
-  voter: string;
-  vote: number;
 }
 
 interface VoterRecord {
@@ -74,7 +68,8 @@ function addVoteToObject(vote: Vote) {
       const record: VoteRecord = {
         body: comment.body.substring(0, 80),
         changed: vote.changed,
-        date: new Date(vote.changed * 1000).toISOString(),
+        created: new Date(comment.created * 1000).toISOString(),
+        voted: new Date(vote.changed * 1000).toISOString(),
         diff: vote.changed - comment.created,
         diffInDays: Math.floor((vote.changed - comment.created) / 86400),
         domain: comment.domain.prefix,
@@ -87,7 +82,7 @@ function addVoteToObject(vote: Vote) {
       };
 
       console.log(
-        record.date,
+        record.voted,
         prettyVote(vote.vote),
         'в комментарий от',
         vote.user.login
@@ -105,7 +100,8 @@ function addVoteToObject(vote: Vote) {
       const record: VoteRecord = {
         title: post.title,
         changed: vote.changed,
-        date: new Date(vote.changed * 1000).toISOString(),
+        created: new Date(post.created * 1000).toISOString(),
+        voted: new Date(vote.changed * 1000).toISOString(),
         diff: vote.changed - post.created,
         diffInDays: Math.floor((vote.changed - post.created) / 86400),
         domain: post.domain.prefix,
@@ -118,7 +114,7 @@ function addVoteToObject(vote: Vote) {
       };
 
       console.log(
-        record.date,
+        record.voted,
         prettyVote(vote.vote),
         'в пост от',
         vote.user.login
