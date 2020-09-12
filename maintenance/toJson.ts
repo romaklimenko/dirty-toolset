@@ -54,7 +54,7 @@ import {MongoClient} from 'mongodb';
     await cacheKarma(user.dude.login);
   }
 
-  await save(usersResult, 'data/users_new.json');
+  await save(usersResult, 'data/users-new.json');
 })()
   .then(() => console.log('done!'))
   .catch(reason => console.log(reason));

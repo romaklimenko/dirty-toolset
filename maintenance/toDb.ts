@@ -1,19 +1,16 @@
 import {UserSchema, KarmaSchema, UserErrorResponse} from '../src/types';
 import {getUser} from '../src/ajax';
 import {karma} from '../src/iterators';
-import {MongoClient} from 'mongodb';
+import {Db} from '../src/db';
 
 const fromId: number = parseInt(process.argv[2], 10) || 1;
 const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
 
 (async function (fromId: number, toId: number) {
-  const client = new MongoClient('mongodb://localhost:27017');
-  await client.connect();
-
-  // TODO: make a factory
-  const db = client.db('dirty');
-  const users = db.collection<UserSchema>('users');
-  const karmas = db.collection<KarmaSchema>('karma');
+  const db = new Db();
+  await db.connect();
+  const users = await db.users();
+  const karmas = await db.karma();
 
   await karmas.createIndex(
     {
@@ -116,5 +113,5 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
     }
   }
 
-  await client.close();
+  await db.close();
 })(fromId, toId).catch(reason => console.log(reason));

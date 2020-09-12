@@ -12,6 +12,12 @@
   },
 */
 
+import {Gender} from '../src/types';
+import {Db} from '../src/db';
+
+import fs from 'fs';
+const resolve = require('path').resolve;
+
 interface UserRecord {
   id: number;
   login: string;
@@ -24,43 +30,12 @@ interface UserRecord {
   deleted: number;
 }
 
-interface UserDiffSchema {
-  _id: number;
-  old_login: string | null;
-  new_login: string | null;
-  login_changed: boolean;
-  old_gender: Gender | null;
-  new_gender: Gender | null;
-  gender_changed: boolean;
-  old_karma: number | null;
-  new_karma: number | null;
-  diff_karma: number;
-  old_posts_count: number | null;
-  new_posts_count: number | null;
-  diff_posts_count: number;
-  old_comments_count: number | null;
-  new_comments_count: number | null;
-  diff_comments_count: number;
-  old_subscribers_count: number | null;
-  new_subscribers_count: number | null;
-  diff_subscribers_count: number;
-  old_active: number | null;
-  new_active: number | null;
-  active_changed: boolean;
-}
-
-import {Gender} from '../src/types';
-
-import fs from 'fs';
-import {MongoClient} from 'mongodb';
-const resolve = require('path').resolve;
-
 const oldUsers = JSON.parse(
   fs.readFileSync(resolve('data/users.json'), 'utf8')
 ) as UserRecord[];
 
 const newUsers = JSON.parse(
-  fs.readFileSync(resolve('data/users_new.json'), 'utf8')
+  fs.readFileSync(resolve('data/users-new.json'), 'utf8')
 ) as UserRecord[];
 
 console.log('hej');
@@ -68,15 +43,13 @@ console.log(oldUsers.length);
 console.log(newUsers.length);
 
 (async function () {
-  const client = new MongoClient('mongodb://localhost:27017');
-  await client.connect();
-
-  const db = client.db('dirty');
-  const diffsCollection = db.collection<UserDiffSchema>('diffs');
+  const db = new Db();
+  await db.connect();
+  const diffs = await db.diffs();
 
   for (const oldUser of oldUsers) {
     console.log('old', oldUser.login, oldUser.id);
-    await diffsCollection.insertOne({
+    await diffs.insertOne({
       _id: oldUser.id,
       old_login: oldUser.login,
       new_login: null,
@@ -104,9 +77,9 @@ console.log(newUsers.length);
 
   for (const newUser of newUsers) {
     console.log('new', newUser.login, newUser.id);
-    const user = await diffsCollection.findOne({_id: newUser.id});
+    const user = await diffs.findOne({_id: newUser.id});
     if (user) {
-      diffsCollection.updateOne(
+      diffs.updateOne(
         {_id: newUser.id},
         {
           $set: {
@@ -137,7 +110,7 @@ console.log(newUsers.length);
         }
       );
     } else {
-      await diffsCollection.insertOne({
+      await diffs.insertOne({
         _id: newUser.id,
         old_login: null,
         new_login: newUser.login,
@@ -163,6 +136,7 @@ console.log(newUsers.length);
       });
     }
   }
+  await db.close();
 })()
   .then(() => console.log('done!'))
   .catch(reason => console.log(reason));

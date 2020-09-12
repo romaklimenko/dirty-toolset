@@ -118,3 +118,28 @@ export interface KarmaSchema extends MongoDocument {
   checked: string;
   deleted: boolean;
 }
+
+export interface UserDiffSchema {
+  _id: number;
+  old_login: string | null;
+  new_login: string | null;
+  login_changed: boolean;
+  old_gender: Gender | null;
+  new_gender: Gender | null;
+  gender_changed: boolean;
+  old_karma: number | null;
+  new_karma: number | null;
+  diff_karma: number;
+  old_posts_count: number | null;
+  new_posts_count: number | null;
+  diff_posts_count: number;
+  old_comments_count: number | null;
+  new_comments_count: number | null;
+  diff_comments_count: number;
+  old_subscribers_count: number | null;
+  new_subscribers_count: number | null;
+  diff_subscribers_count: number;
+  old_active: number | null;
+  new_active: number | null;
+  active_changed: boolean;
+}
