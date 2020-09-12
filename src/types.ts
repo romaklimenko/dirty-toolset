@@ -105,12 +105,16 @@ export interface MongoDocument {
   _id?: ObjectId;
 }
 
-export interface UserSchema extends MongoDocument, UserResponse {}
+export interface UserSchema extends UserResponse {
+  _id: string;
+}
 
 export interface KarmaSchema extends MongoDocument {
   from: string;
   to: string;
   changed: number;
+  date: string;
   vote: number;
+  checked: string;
   deleted: boolean;
 }

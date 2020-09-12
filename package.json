@@ -17,9 +17,9 @@
     "fix": "gts fix",
     "votes": "ts-node tools/votes.ts",
     "karma": "ts-node tools/karma.ts",
-    "usersToDb": "ts-node tools/users_to_db.ts",
-    "usersToJson": "ts-node tools/users_to_json.ts",
-    "uploadCache": "python3 tools/cache.py"
+    "maintenance:cache:db": "ts-node maintenance/toDb.ts",
+    "maintenance:cache:json": "ts-node maintenance/toJson.ts",
+    "maintenance:cache:upload": "python3 maintenance/upload.py"
   },
   "repository": {
     "type": "git",

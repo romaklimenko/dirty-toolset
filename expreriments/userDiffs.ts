@@ -1,0 +1,195 @@
+/*
+  {
+    "id": 36977,
+    "login": "romaklimenko",
+    "gender": "male",
+    "karma": 368,
+    "posts_count": 382,
+    "comments_count": 7042,
+    "subscribers_count": 39,
+    "active": 1,
+    "deleted": 0
+  },
+*/
+
+interface UserRecord {
+  id: number;
+  login: string;
+  gender: Gender;
+  karma: number;
+  posts_count: number;
+  comments_count: number;
+  subscribers_count: number;
+  active: number;
+  deleted: number;
+}
+
+interface UserDiffSchema {
+  _id: number;
+  old_login: string | null;
+  new_login: string | null;
+  login_changed: boolean;
+  old_gender: Gender | null;
+  new_gender: Gender | null;
+  gender_changed: boolean;
+  old_karma: number | null;
+  new_karma: number | null;
+  diff_karma: number;
+  old_posts_count: number | null;
+  new_posts_count: number | null;
+  diff_posts_count: number;
+  old_comments_count: number | null;
+  new_comments_count: number | null;
+  diff_comments_count: number;
+  old_subscribers_count: number | null;
+  new_subscribers_count: number | null;
+  diff_subscribers_count: number;
+  old_active: number | null;
+  new_active: number | null;
+  active_changed: boolean;
+}
+
+import {Gender} from '../src/types';
+
+import fs from 'fs';
+import {MongoClient} from 'mongodb';
+const resolve = require('path').resolve;
+
+const oldUsers = JSON.parse(
+  fs.readFileSync(resolve('data/users.json'), 'utf8')
+) as UserRecord[];
+
+const newUsers = JSON.parse(
+  fs.readFileSync(resolve('data/users_new.json'), 'utf8')
+) as UserRecord[];
+
+console.log('hej');
+console.log(oldUsers.length);
+console.log(newUsers.length);
+
+(async function () {
+  const client = new MongoClient('mongodb://localhost:27017');
+  await client.connect();
+
+  const db = client.db('dirty');
+  const diffsCollection = db.collection<UserDiffSchema>('diffs');
+
+  for (const oldUser of oldUsers) {
+    console.log('old', oldUser.login, oldUser.id);
+    await diffsCollection.insertOne({
+      _id: oldUser.id,
+      old_login: oldUser.login,
+      new_login: null,
+      login_changed: false,
+      old_gender: oldUser.gender,
+      new_gender: null,
+      gender_changed: false,
+      old_karma: oldUser.karma,
+      new_karma: null,
+      diff_karma: 0,
+      old_posts_count: oldUser.posts_count,
+      new_posts_count: null,
+      diff_posts_count: 0,
+      old_comments_count: oldUser.comments_count,
+      new_comments_count: null,
+      diff_comments_count: 0,
+      old_subscribers_count: oldUser.subscribers_count,
+      new_subscribers_count: null,
+      diff_subscribers_count: 0,
+      old_active: oldUser.active,
+      new_active: null,
+      active_changed: false,
+    });
+  }
+
+  for (const newUser of newUsers) {
+    console.log('new', newUser.login, newUser.id);
+    const user = await diffsCollection.findOne({_id: newUser.id});
+    if (user) {
+      diffsCollection.updateOne(
+        {_id: newUser.id},
+        {
+          $set: {
+            new_login: newUser.login,
+            login_changed: user.old_login !== newUser.login,
+            new_gender: newUser.gender,
+            gender_changed: user.old_gender !== newUser.gender,
+            new_karma: newUser.karma,
+            diff_karma:
+              newUser.karma - (user.old_karma === null ? 0 : user.old_karma),
+            new_posts_count: newUser.posts_count,
+            diff_posts_count:
+              newUser.posts_count -
+              (user.old_posts_count === null ? 0 : user.old_posts_count),
+            new_comments_count: newUser.comments_count,
+            diff_comments_count:
+              newUser.comments_count -
+              (user.old_comments_count === null ? 0 : user.old_comments_count),
+            new_subscribers_count: newUser.subscribers_count,
+            diff_subscribers_count:
+              newUser.subscribers_count -
+              (user.old_subscribers_count === null
+                ? 0
+                : user.old_subscribers_count),
+            new_active: newUser.active,
+            active_changed: user.old_active !== newUser.active,
+          },
+        }
+      );
+    } else {
+      await diffsCollection.insertOne({
+        _id: newUser.id,
+        old_login: null,
+        new_login: newUser.login,
+        login_changed: true,
+        old_gender: null,
+        new_gender: newUser.gender,
+        gender_changed: true,
+        old_karma: null,
+        new_karma: newUser.karma,
+        diff_karma: newUser.karma,
+        old_posts_count: null,
+        new_posts_count: newUser.posts_count,
+        diff_posts_count: newUser.posts_count,
+        old_comments_count: null,
+        new_comments_count: newUser.comments_count,
+        diff_comments_count: newUser.comments_count,
+        old_subscribers_count: null,
+        new_subscribers_count: newUser.subscribers_count,
+        diff_subscribers_count: newUser.subscribers_count,
+        old_active: null,
+        new_active: newUser.active,
+        active_changed: true,
+      });
+    }
+  }
+})()
+  .then(() => console.log('done!'))
+  .catch(reason => console.log(reason));
+
+// Удалены:
+// db.diffs.find({ new_login: null }).sort({ _id: 1 })
+
+// Добавлены:
+// db.diffs.find({ old_login: null }).sort({ _id: 1 })
+
+// Изменили пол:
+// db.diffs.find({ gender_changed: true }).sort({ _id: 1 })
+
+// Потеряли больше всего кармы:
+// db.diffs.find({}, { new_login: true, diff_karma: true, _id: false }).sort({ diff_karma: 1 }).limit(10).toArray()
+
+// Приобрели больше всего кармы:
+// db.diffs.find({}, { new_login: true, diff_karma: true, _id: false }).sort({ diff_karma: -1 }).limit(10).toArray()
+
+// Приобрели подписчиков:
+// db.diffs.find({}, { new_login: 1, diff_subscribers_count: 1, _id: false }).sort({ diff_subscribers_count: -1 }).limit(10).toArray()
+
+// Потеряли подписчиков:
+// db.diffs.find({}, { new_login: 1, diff_subscribers_count: 1, _id: false }).sort({ diff_subscribers_count: -1 }).limit(10).toArray()
+
+// Написали больше всего комментариев:
+// db.diffs.find({}, { new_login: 1, diff_subscribers_count: 1, _id: false }).sort({ diff_subscribers_count: -1 }).limit(10).toArray()
+
+// Написали больше всего постов:
+// db.diffs.find({}, { new_login: 1, diff_posts_count: 1, _id: false }).sort({ diff_posts_count: -1 }).limit(10).toArray()
