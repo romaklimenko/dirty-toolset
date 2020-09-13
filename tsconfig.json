@@ -1,9 +1,7 @@
 {
   "extends": "./node_modules/gts/tsconfig-google.json",
   "compilerOptions": {
-    "esModuleInterop": true,
     "noImplicitAny": false,
-    "resolveJsonModule": true,
     "rootDir": ".",
   },
   "include": [
