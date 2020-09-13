@@ -1,6 +1,8 @@
 import {
   Comment,
   CommentsResponse,
+  Domain,
+  DomainsResponse,
   PagedResponse,
   Post,
   PostsResponse,
@@ -83,6 +85,13 @@ export function commentVotes(id: number) {
   });
 }
 
-// TODO: domains
+export function domains() {
+  return pageIterator<DomainsResponse, Domain>({
+    url: 'domains',
+    perPage: 42,
+    entitiesGetter: (response: DomainsResponse) => response.domains,
+  });
+}
+
 // TODO: domainPosts
 // TODO: postComments

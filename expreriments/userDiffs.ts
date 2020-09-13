@@ -15,7 +15,7 @@
 import {Gender} from '../src/types';
 import {Db} from '../src/db';
 
-import fs from 'fs';
+import * as fs from 'fs';
 const resolve = require('path').resolve;
 
 interface UserRecord {

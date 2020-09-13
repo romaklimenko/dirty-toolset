@@ -1,5 +1,5 @@
-import {MongoClient} from 'mongodb';
-import {KarmaSchema, UserDiffSchema, UserSchema} from './types';
+import {MongoClient, ObjectId} from 'mongodb';
+import {Gender, UserResponse} from './types';
 
 export class Db {
   private client: MongoClient;
@@ -40,4 +40,47 @@ export class Db {
     const collection = this.db().collection<UserDiffSchema>('diffs');
     return collection;
   }
+}
+
+export interface MongoDocument {
+  _id?: ObjectId;
+}
+
+export interface UserSchema extends UserResponse {
+  _id: string;
+}
+
+export interface KarmaSchema extends MongoDocument {
+  from: string;
+  to: string;
+  changed: number;
+  date: string;
+  vote: number;
+  checked: string;
+  deleted: boolean;
+}
+
+export interface UserDiffSchema {
+  _id: number;
+  old_login: string | null;
+  new_login: string | null;
+  login_changed: boolean;
+  old_gender: Gender | null;
+  new_gender: Gender | null;
+  gender_changed: boolean;
+  old_karma: number | null;
+  new_karma: number | null;
+  diff_karma: number;
+  old_posts_count: number | null;
+  new_posts_count: number | null;
+  diff_posts_count: number;
+  old_comments_count: number | null;
+  new_comments_count: number | null;
+  diff_comments_count: number;
+  old_subscribers_count: number | null;
+  new_subscribers_count: number | null;
+  diff_subscribers_count: number;
+  old_active: number | null;
+  new_active: number | null;
+  active_changed: boolean;
 }

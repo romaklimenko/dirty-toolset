@@ -52,5 +52,17 @@ describe('iterators', () => {
         expect(vote.vote).toBeDefined();
       }
     });
+
+    test('domains() should return domains', async () => {
+      let count = 10;
+      for await (const domain of Iterators.domains()) {
+        if (--count < 0) {
+          break;
+        }
+        expect(domain.id).toBeDefined();
+        expect(domain.prefix).toBeDefined();
+        expect(domain.readers_count).toBeDefined();
+      }
+    });
   });
 });

@@ -1,5 +1,3 @@
-import {ObjectId} from 'mongodb';
-
 export type Gender = 'male' | 'female';
 
 export interface Domain {
@@ -64,6 +62,10 @@ export interface PostsResponse extends PagedResponse {
   posts: Post[];
 }
 
+export interface DomainsResponse extends PagedResponse {
+  domains: Domain[];
+}
+
 export interface VotesResponse extends PagedResponse {
   upvotes: Vote[];
   downvotes: Vote[];
@@ -99,47 +101,4 @@ export interface PagedResponse {
   page_count: number;
   page: number;
   per_page: number;
-}
-
-export interface MongoDocument {
-  _id?: ObjectId;
-}
-
-export interface UserSchema extends UserResponse {
-  _id: string;
-}
-
-export interface KarmaSchema extends MongoDocument {
-  from: string;
-  to: string;
-  changed: number;
-  date: string;
-  vote: number;
-  checked: string;
-  deleted: boolean;
-}
-
-export interface UserDiffSchema {
-  _id: number;
-  old_login: string | null;
-  new_login: string | null;
-  login_changed: boolean;
-  old_gender: Gender | null;
-  new_gender: Gender | null;
-  gender_changed: boolean;
-  old_karma: number | null;
-  new_karma: number | null;
-  diff_karma: number;
-  old_posts_count: number | null;
-  new_posts_count: number | null;
-  diff_posts_count: number;
-  old_comments_count: number | null;
-  new_comments_count: number | null;
-  diff_comments_count: number;
-  old_subscribers_count: number | null;
-  new_subscribers_count: number | null;
-  diff_subscribers_count: number;
-  old_active: number | null;
-  new_active: number | null;
-  active_changed: boolean;
 }
