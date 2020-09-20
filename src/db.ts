@@ -31,6 +31,7 @@ export class Db {
     await collection.createIndexes([
       {key: {from: 1, to: 1, changed: 1, vote: 1}, unique: true},
       {key: {to: 1, checked: 1, deleted: 1}},
+      {key: {deleted: 1}},
       {key: {date: 1}},
     ]);
     return collection;

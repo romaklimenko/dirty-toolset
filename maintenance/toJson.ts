@@ -1,14 +1,11 @@
-import {UserSchema, KarmaSchema} from '../src/types';
+import {Db, UserSchema, KarmaSchema} from '../src/db';
 import {save} from '../src/fs';
-import {MongoClient} from 'mongodb';
 
 (async function () {
-  const client = new MongoClient('mongodb://localhost:27017');
-  await client.connect();
-
-  const db = client.db('dirty');
-  const usersCollection = db.collection<UserSchema>('users');
-  const karmaCollection = db.collection<KarmaSchema>('karma');
+  const db = new Db();
+  await db.connect();
+  const usersCollection = await db.users();
+  const karmaCollection = await db.karma();
 
   const users: UserSchema[] = await usersCollection
     .aggregate([{$sort: {'dude.id': -1}}])
@@ -53,8 +50,8 @@ import {MongoClient} from 'mongodb';
     });
     await cacheKarma(user.dude.login);
   }
-
   await save(usersResult, 'data/users-new.json');
+  await db.close();
 })()
   .then(() => console.log('done!'))
   .catch(reason => console.log(reason));

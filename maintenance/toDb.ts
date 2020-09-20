@@ -1,7 +1,7 @@
-import {UserSchema, KarmaSchema, UserErrorResponse} from '../src/types';
+import {Db, UserSchema, KarmaSchema} from '../src/db';
+import {UserErrorResponse} from '../src/types';
 import {getUser} from '../src/ajax';
 import {karma} from '../src/iterators';
-import {Db} from '../src/db';
 
 const fromId: number = parseInt(process.argv[2], 10) || 1;
 const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
@@ -61,18 +61,22 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
           {$set: {deleted: true}}
         );
 
-        // если голос уже записан,
-        await karmas.updateOne(
-          {
-            from: doc.from,
-            to: doc.to,
-            changed: doc.changed,
-            vote: doc.vote,
-            deleted: false,
-          },
-          {$set: doc}, // перезапишем с новым checked
-          {upsert: true} // или запишем новый голос
-        );
+        try {
+          // если голос уже записан,
+          await karmas.updateOne(
+            {
+              from: doc.from,
+              to: doc.to,
+              changed: doc.changed,
+              vote: doc.vote,
+              deleted: false,
+            },
+            {$set: doc}, // перезапишем с новым checked
+            {upsert: true} // или запишем новый голос
+          );
+        } catch (error) {
+          console.log(error);
+        }
       }
 
       // все последние голоса в карму пользователя записаны,

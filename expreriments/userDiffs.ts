@@ -47,6 +47,8 @@ console.log(newUsers.length);
   await db.connect();
   const diffs = await db.diffs();
 
+  await diffs.deleteMany({});
+
   for (const oldUser of oldUsers) {
     console.log('old', oldUser.login, oldUser.id);
     await diffs.insertOne({

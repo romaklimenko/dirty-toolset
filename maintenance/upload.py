@@ -19,5 +19,6 @@ for file_name in sorted(os.listdir(cache_dir)):
     blob = storage.Blob(file_name, bucket)
     with open(file_path, 'rb') as my_file:
         blob.upload_from_file(my_file, content_type='application/json')
+    os.remove(file_path)
 
     print(f'{file_name} created')
