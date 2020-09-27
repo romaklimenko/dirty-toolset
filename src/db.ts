@@ -29,10 +29,15 @@ export class Db {
   async karma() {
     const collection = this.db().collection<KarmaSchema>('karma');
     await collection.createIndexes([
-      {key: {from: 1, to: 1, changed: 1, vote: 1}, unique: true},
-      {key: {to: 1, checked: 1, deleted: 1}},
-      {key: {deleted: 1}},
+      {key: {'dude.id': 1}},
+      {key: {changed: 1}},
       {key: {date: 1}},
+      {key: {deleted: 1}},
+      {key: {from: 1, to: 1, changed: 1, vote: 1}},
+      {key: {fromId: 1, changed: 1}},
+      {key: {fromId: 1, toId: 1, changed: 1, vote: 1}, unique: true},
+      {key: {to: 1, checked: 1, deleted: 1}},
+      {key: {toId: 1, checked: 1, deleted: 1}},
     ]);
     return collection;
   }
@@ -53,7 +58,9 @@ export interface UserSchema extends UserResponse {
 
 export interface KarmaSchema extends MongoDocument {
   from: string;
+  fromId: number;
   to: string;
+  toId: number;
   changed: number;
   date: string;
   vote: number;

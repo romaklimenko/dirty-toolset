@@ -12,20 +12,6 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
   const users = await db.users();
   const karmas = await db.karma();
 
-  await karmas.createIndex(
-    {
-      from: 1,
-      to: 1,
-      changed: 1,
-      vote: 1,
-    },
-    {unique: true}
-  );
-
-  await karmas.createIndex({
-    changed: 1,
-  });
-
   const maxErrors = 1000;
   let errortsLeft = maxErrors;
 
@@ -42,7 +28,9 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
         // этот документ мы запишем
         const doc: KarmaSchema = {
           from: vote.user.login,
+          fromId: vote.user.id,
           to: response.dude.login,
+          toId: response.dude.id,
           vote: vote.vote,
           changed: vote.changed,
           date: new Date(vote.changed * 1000).toISOString().substr(0, 10),
@@ -52,8 +40,8 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
         // но сначала мы пометим как удаленный, предыдущий голос (если был)
         await karmas.updateMany(
           {
-            from: doc.from,
-            to: doc.to,
+            fromId: doc.fromId,
+            toId: doc.toId,
             vote: doc.vote,
             changed: {$ne: doc.changed},
             deleted: false,
@@ -65,8 +53,8 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
           // если голос уже записан,
           await karmas.updateOne(
             {
-              from: doc.from,
-              to: doc.to,
+              fromId: doc.fromId,
+              toId: doc.toId,
               changed: doc.changed,
               vote: doc.vote,
               deleted: false,
@@ -83,7 +71,7 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
       // отмечаем как удаленные те голоса, которые не были только что обновлены
       await karmas.updateMany(
         {
-          to: response.dude.login,
+          toId: response.dude.id,
           checked: {$ne: checked},
           deleted: false,
         },
