@@ -162,10 +162,10 @@ console.log(newUsers.length);
 // db.diffs.find({}, { new_login: 1, diff_subscribers_count: 1, _id: false }).sort({ diff_subscribers_count: -1 }).limit(10).toArray()
 
 // Потеряли подписчиков:
-// db.diffs.find({}, { new_login: 1, diff_subscribers_count: 1, _id: false }).sort({ diff_subscribers_count: -1 }).limit(10).toArray()
+// db.diffs.find({}, { new_login: 1, diff_subscribers_count: 1, _id: false }).sort({ diff_subscribers_count: 1 }).limit(10).toArray()
 
 // Написали больше всего комментариев:
-// db.diffs.find({}, { new_login: 1, diff_subscribers_count: 1, _id: false }).sort({ diff_subscribers_count: -1 }).limit(10).toArray()
+// db.diffs.find({}, { new_login: 1, diff_comments_count: 1, _id: false }).sort({ diff_comments_count: -1 }).limit(10).toArray()
 
 // Написали больше всего постов:
 // db.diffs.find({}, { new_login: 1, diff_posts_count: 1, _id: false }).sort({ diff_posts_count: -1 }).limit(10).toArray()
