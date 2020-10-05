@@ -58,6 +58,10 @@ export interface CommentsResponse extends PagedResponse {
   comments: Comment[];
 }
 
+export interface PostCommentsResponse {
+  comments: Comment[];
+}
+
 export interface PostsResponse extends PagedResponse {
   posts: Post[];
 }

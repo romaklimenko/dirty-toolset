@@ -64,5 +64,28 @@ describe('iterators', () => {
         expect(domain.readers_count).toBeDefined();
       }
     });
+
+    test('domainPosts() should return posts', async () => {
+      let count = 26;
+      for await (const post of Iterators.domainPosts(
+        'denmark',
+        1599836426,
+        1601637623
+      )) {
+        if (--count < 0) {
+          break;
+        }
+        expect(post.id).toBeDefined();
+        expect(post.title).toBeDefined();
+      }
+      expect(count).toBe(0);
+    });
+
+    test('postComments() should return comments', async () => {
+      for await (const comment of Iterators.postComments(2048650)) {
+        expect(comment.id).toBeDefined();
+        expect(comment.body).toBeDefined();
+      }
+    });
   });
 });

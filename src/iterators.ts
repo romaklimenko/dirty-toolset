@@ -5,6 +5,7 @@ import {
   DomainsResponse,
   PagedResponse,
   Post,
+  PostCommentsResponse,
   PostsResponse,
   Vote,
   VotesResponse,
@@ -22,6 +23,8 @@ interface PageIteratorOptions<TResponse extends PagedResponse, TEntity> {
 function pageIterator<TResponse extends PagedResponse, TEntity>(
   options: PageIteratorOptions<TResponse, TEntity>
 ) {
+  const url = `${options.url}${options.url.indexOf('?') !== -1 ? '&' : '?'}`;
+
   return (async function* () {
     const entities: TEntity[] = [];
     let pageCount = 1;
@@ -29,7 +32,8 @@ function pageIterator<TResponse extends PagedResponse, TEntity>(
 
     while (entities.length === 0 && page <= pageCount) {
       const response = await get(
-        `${options.url}?per_page=${options.perPage}&page=${page++}`
+        // eslint-disable-next-line prettier/prettier
+        `${url}per_page=${options.perPage}&page=${page++}`
       );
       const json = (await response.json()) as TResponse;
       pageCount = json.page_count;
@@ -93,5 +97,18 @@ export function domains() {
   });
 }
 
-// TODO: domainPosts
-// TODO: postComments
+export function domainPosts(prefix: string, from: number, to: number) {
+  return pageIterator<PostsResponse, Post>({
+    url: `posts2/?created__gte=${from}&created__lt=${to}&domain_prefix=${prefix}`,
+    perPage: 42,
+    entitiesGetter: (response: PostsResponse) => response.posts,
+  });
+}
+
+export async function* postComments(id: number) {
+  const response = await get(`posts/${id}/comments`);
+  const json = (await response.json()) as PostCommentsResponse;
+  for (const comment of json.comments) {
+    yield comment as Comment;
+  }
+}
