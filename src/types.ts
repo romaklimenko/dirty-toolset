@@ -40,6 +40,7 @@ export interface Post {
   data: {}; // TODO(romaklimenko): post types
   domain: Domain;
   favourites_count: number;
+  golden: boolean;
   id: number;
   rating: number;
   tags: string[];
