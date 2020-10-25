@@ -53,6 +53,7 @@ function getRecord(records: DomainKpiRecords, epoch: number): DomainKpiRecord {
   const records: DomainKpiRecords = {};
 
   for await (const post of Iterators.domainPosts(prefix, from, to)) {
+    console.log(`${epochToDate(post.created)} ${post.title}`);
     const postRecord = getRecord(records, post.created);
     if (post.golden) {
       postRecord.goldenCount += 1;
@@ -82,14 +83,14 @@ function getRecord(records: DomainKpiRecords, epoch: number): DomainKpiRecord {
         const record = records[k];
         return {
           date: k,
-          authors: Array.from(record.authors).sort(),
+          // authors: Array.from(record.authors).sort(),
           authorCount: record.authorCount,
           postCount: record.postCount,
-          postVoters: Array.from(record.postVoters).sort(),
+          // postVoters: Array.from(record.postVoters).sort(),
           postVotersCount: record.postVotersCount,
           commentCount: record.commentCount,
           commentersCount: record.commenterCount,
-          commenters: Array.from(record.commenters).sort(),
+          // commenters: Array.from(record.commenters).sort(),
           goldenCount: record.goldenCount,
         };
       }),
