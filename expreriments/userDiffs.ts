@@ -150,7 +150,7 @@ console.log(newUsers.length);
 // db.diffs.find({ old_login: null }).sort({ _id: 1 })
 
 // Изменили пол:
-// db.diffs.find({ gender_changed: true }).sort({ _id: 1 })
+// db.diffs.find({ gender_changed: true, old_gender: { $ne: null } }).sort({ _id: 1 }).toArray()
 
 // Потеряли больше всего кармы:
 // db.diffs.find({}, { new_login: true, diff_karma: true, _id: false }).sort({ diff_karma: 1 }).limit(10).toArray()
