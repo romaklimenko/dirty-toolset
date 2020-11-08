@@ -36,8 +36,10 @@ function pageIterator<TResponse extends PagedResponse, TEntity>(
         `${url}per_page=${options.perPage}&page=${page++}`
       );
       const json = (await response.json()) as TResponse;
-      pageCount = json.page_count;
-      entities.push(...options.entitiesGetter(json));
+      if (json !== null) {
+        pageCount = json.page_count;
+        entities.push(...options.entitiesGetter(json));
+      }
 
       while (entities.length > 0) {
         yield entities.shift() as TEntity;

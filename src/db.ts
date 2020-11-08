@@ -22,7 +22,10 @@ export class Db {
 
   async users() {
     const collection = this.db().collection<UserSchema>('users');
-    await collection.createIndexes([{key: {'dude.login': 1}, unique: true}]);
+    await collection.createIndexes([
+      {key: {'dude.login': 1}, unique: true},
+      {key: {'dude.id': 1}, unique: true},
+    ]);
     return collection;
   }
 

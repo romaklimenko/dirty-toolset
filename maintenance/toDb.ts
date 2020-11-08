@@ -16,6 +16,10 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
   let errortsLeft = maxErrors;
 
   for (let userId = fromId; userId < toId && errortsLeft > 0; userId++) {
+    if (await users.findOne({'dude.id': userId})) {
+      console.log(`User ID ${userId} is already processed.`);
+      continue;
+    }
     const response = await getUser(userId);
     if (response.status === 'OK') {
       errortsLeft = maxErrors;
