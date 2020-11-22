@@ -31,14 +31,18 @@ function pageIterator<TResponse extends PagedResponse, TEntity>(
     let page = 1;
 
     while (entities.length === 0 && page <= pageCount) {
-      const response = await get(
-        // eslint-disable-next-line prettier/prettier
-        `${url}per_page=${options.perPage}&page=${page++}`
-      );
-      const json = (await response.json()) as TResponse;
-      if (json !== null) {
-        pageCount = json.page_count;
-        entities.push(...options.entitiesGetter(json));
+      try {
+        const response = await get(
+          // eslint-disable-next-line prettier/prettier
+          `${url}per_page=${options.perPage}&page=${page++}`
+        );
+        const json = (await response.json()) as TResponse;
+        if (json !== null) {
+          pageCount = json.page_count;
+          entities.push(...options.entitiesGetter(json));
+        }
+      } catch (error) {
+        console.error(error);
       }
 
       while (entities.length > 0) {
