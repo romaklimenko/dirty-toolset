@@ -1,33 +1,9 @@
 import * as Iterators from '../src/iterators';
 import {save} from '../src/fs';
-import {Vote} from '../src/types';
+import {Vote, VoteRecord, VoterRecord} from '../src/types';
 import * as prompt from 'async-prompt';
 
 require('dotenv').config();
-
-interface VoteRecord {
-  title?: string;
-  body?: string;
-  changed: number;
-  created: string;
-  voted: string;
-  diff: number;
-  diffInDays: number;
-  domain: string;
-  type: 'comment' | 'post';
-  url: string;
-  vote: number;
-  voter: string;
-}
-
-interface VoterRecord {
-  voter: string;
-  downvotes: number;
-  downvotesCount: number;
-  upvotes: number;
-  upvotesCount: number;
-  sum: number;
-}
 
 const votes: VoteRecord[] = [];
 const voters: {[key: string]: VoterRecord} = {};

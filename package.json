@@ -16,6 +16,7 @@
     "clean": "gts clean",
     "fix": "gts fix",
     "votes": "ts-node tools/votes.ts",
+    "votes:batches": "ts-node tools/voteBatches.ts",
     "karma": "ts-node tools/karma.ts",
     "maintenance:cache:db": "ts-node maintenance/toDb.ts",
     "maintenance:cache:json": "ts-node maintenance/toJson.ts",

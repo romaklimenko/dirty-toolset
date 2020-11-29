@@ -143,11 +143,11 @@ console.log(newUsers.length);
   .then(() => console.log('done!'))
   .catch(reason => console.log(reason));
 
-// Удалены:
-// db.diffs.find({ new_login: null }).sort({ _id: 1 })
-
 // Добавлены:
-// db.diffs.find({ old_login: null }).sort({ _id: 1 })
+// db.diffs.find({ old_login: null }).sort({ _id: 1 }).toArray()
+
+// Удалены:
+// db.diffs.find({ new_login: null }).sort({ _id: 1 }).toArray()
 
 // Изменили пол:
 // db.diffs.find({ gender_changed: true, old_gender: { $ne: null } }).sort({ _id: 1 }).toArray()

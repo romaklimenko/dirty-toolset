@@ -107,3 +107,27 @@ export interface PagedResponse {
   page: number;
   per_page: number;
 }
+
+export interface VoteRecord {
+  title?: string;
+  body?: string;
+  changed: number;
+  created: string;
+  voted: string;
+  diff: number;
+  diffInDays: number;
+  domain: string;
+  type: 'comment' | 'post';
+  url: string;
+  vote: number;
+  voter: string;
+}
+
+export interface VoterRecord {
+  voter: string;
+  downvotes: number;
+  downvotesCount: number;
+  upvotes: number;
+  upvotesCount: number;
+  sum: number;
+}
