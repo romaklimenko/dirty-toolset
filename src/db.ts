@@ -5,7 +5,7 @@ export class Db {
   private client: MongoClient;
 
   constructor() {
-    this.client = new MongoClient('mongodb://localhost:27017');
+    this.client = new MongoClient(process.env.MONGO as string);
   }
 
   private db() {
