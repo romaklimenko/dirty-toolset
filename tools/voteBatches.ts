@@ -67,7 +67,7 @@ function scan() {
     output += `${batchToString(batch, true)}`;
   }
 
-  output += `votes: ${votes.length}\nbatches: ${batches.length}`;
+  output += `batches: ${batches.length}`;
 
   saveText(output, `${process.env.DATA}/${userName}-votes-in-batches.txt`);
 
