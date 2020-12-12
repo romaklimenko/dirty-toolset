@@ -2,6 +2,7 @@ import {Db, UserSchema, KarmaSchema} from '../src/db';
 import {UserErrorResponse} from '../src/types';
 import {getUser} from '../src/ajax';
 import {karma} from '../src/iterators';
+import {note} from '../src/notes';
 
 const fromId: number = parseInt(process.argv[2], 10) || 1;
 const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
@@ -82,11 +83,21 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
         {$set: {deleted: true}}
       );
 
+      let yourbunnywrote: string | null = null;
+      
+      try {
+        yourbunnywrote = await note(response.dude.login, process.env.USERNAME);
+      } catch(error) {
+        console.error(error);
+      }
+      
       const doc: UserSchema = {
         _id: response.dude.login,
         status: response.status,
         subscribers_count: response.subscribers_count,
         dude: {
+          city: response.dude.city,
+          country: response.dude.country,
           deleted: response.dude.deleted,
           gender: response.dude.gender,
           subscribers_count: response.dude.subscribers_count,
@@ -97,6 +108,7 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
         },
         comments_count: response.comments_count,
         posts_count: response.posts_count,
+        yourbunnywrote: yourbunnywrote
       };
       await users.insertOne(doc);
     } else {

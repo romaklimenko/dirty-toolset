@@ -22,6 +22,12 @@ interface UserRecord {
   id: number;
   login: string;
   gender: Gender;
+  city: {
+    name: string;
+  };
+  country: {
+    name: string;
+  };
   karma: number;
   posts_count: number;
   comments_count: number;
@@ -59,6 +65,12 @@ console.log(newUsers.length);
       old_gender: oldUser.gender,
       new_gender: null,
       gender_changed: false,
+      old_city: oldUser.city.name,
+      new_city: null,
+      city_changed: false,
+      old_country: oldUser.country.name,
+      new_country: null,
+      country_changed: false,
       old_karma: oldUser.karma,
       new_karma: null,
       diff_karma: 0,
@@ -120,6 +132,12 @@ console.log(newUsers.length);
         old_gender: null,
         new_gender: newUser.gender,
         gender_changed: true,
+        old_city: null,
+        new_city: newUser.city.name,
+        city_changed: true,
+        old_country: null,
+        new_country: newUser.country.name,
+        country_changed: true,
         old_karma: null,
         new_karma: newUser.karma,
         diff_karma: newUser.karma,

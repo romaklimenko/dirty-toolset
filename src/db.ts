@@ -57,6 +57,7 @@ export interface MongoDocument {
 
 export interface UserSchema extends UserResponse {
   _id: string;
+  yourbunnywrote: string | null;
 }
 
 export interface KarmaSchema extends MongoDocument {
@@ -79,6 +80,12 @@ export interface UserDiffSchema {
   old_gender: Gender | null;
   new_gender: Gender | null;
   gender_changed: boolean;
+  old_city: string | null;
+  new_city: string | null;
+  city_changed: boolean;
+  old_country: string | null;
+  new_country: string | null;
+  country_changed: boolean;
   old_karma: number | null;
   new_karma: number | null;
   diff_karma: number;

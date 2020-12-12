@@ -80,6 +80,14 @@ export interface UserResponse {
   status: 'OK' | 'ERR';
   subscribers_count: number;
   dude: {
+    city: {
+      id: number;
+      name: string;
+    };
+    country: {
+      id: number;
+      name: string;
+    };
     deleted: number;
     gender: string;
     subscribers_count: number;
