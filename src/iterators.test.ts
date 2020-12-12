@@ -32,7 +32,7 @@ describe('iterators', () => {
         expect(comment.id).not.toBeNaN();
       }
       // Assert
-      expect(count).toBe(22);
+      expect(count).toBe(23);
     });
 
     test('karma(userName) should return karma votes', async () => {
