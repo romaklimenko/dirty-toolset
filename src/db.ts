@@ -57,7 +57,6 @@ export interface MongoDocument {
 
 export interface UserSchema extends UserResponse {
   _id: string;
-  yourbunnywrote: string | null;
 }
 
 export interface KarmaSchema extends MongoDocument {

@@ -82,14 +82,6 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
         },
         {$set: {deleted: true}}
       );
-
-      let yourbunnywrote: string | null = null;
-      
-      try {
-        yourbunnywrote = await note(response.dude.login, process.env.USERNAME);
-      } catch(error) {
-        console.error(error);
-      }
       
       const doc: UserSchema = {
         _id: response.dude.login,
@@ -107,8 +99,7 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
           id: response.dude.id,
         },
         comments_count: response.comments_count,
-        posts_count: response.posts_count,
-        yourbunnywrote: yourbunnywrote
+        posts_count: response.posts_count
       };
       await users.insertOne(doc);
     } else {
