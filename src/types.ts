@@ -139,3 +139,13 @@ export interface VoterRecord {
   upvotesCount: number;
   sum: number;
 }
+
+export interface NotesResponse extends PagedResponse {
+  user_notes: NoteResponse[];
+}
+
+export interface NoteResponse {
+  body: string;
+  id: number;
+  created: number;
+}

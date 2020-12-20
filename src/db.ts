@@ -1,5 +1,5 @@
 import {MongoClient, ObjectId} from 'mongodb';
-import {Gender, UserResponse} from './types';
+import {Gender, NoteResponse, UserResponse} from './types';
 
 export class Db {
   private client: MongoClient;
@@ -41,6 +41,14 @@ export class Db {
       {key: {fromId: 1, toId: 1, changed: 1, vote: 1}, unique: true},
       {key: {to: 1, checked: 1, deleted: 1}},
       {key: {toId: 1, checked: 1, deleted: 1}},
+    ]);
+    return collection;
+  }
+
+  async notes() {
+    const collection = this.db().collection<NoteSchema>('notes');
+    await collection.createIndexes([
+      {key: {author: 1, body: 1, id: 1, created: 1}, unique: true},
     ]);
     return collection;
   }
@@ -100,4 +108,10 @@ export interface UserDiffSchema {
   old_active: number | null;
   new_active: number | null;
   active_changed: boolean;
+}
+
+
+export interface NoteSchema extends MongoDocument, NoteResponse {
+  author: string;
+  date: string;
 }

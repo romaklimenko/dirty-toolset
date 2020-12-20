@@ -4,22 +4,22 @@
 
 import { note } from './notes';
 
-const toUserName = 'botan';
+const toUserName = 'r10o';
 
 describe('notes', () => {
     describe('integration', () => {
         test('should get a note', async () => {
             // Arrange
-            const fromUserName = 'romaklimenko';
+            const fromUserName = 'botan';
             // Act
             const noteFromUser = await note(fromUserName, toUserName);
             // Assert
-            expect(noteFromUser).toBe('ботан');
+            expect(noteFromUser?.body).toBe('Привет!');
         });
 
         test('should not get a note', async () => {
             // Arrange
-            const fromUserName = 'interesno';
+            const fromUserName = 'lopatkin';
             // Act
             const noteFromUser = await note(fromUserName, toUserName);
             // Assert
