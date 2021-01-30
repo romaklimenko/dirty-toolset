@@ -176,6 +176,23 @@ console.log(newUsers.length);
 // Приобрели больше всего кармы:
 // db.diffs.find({}, { new_login: true, diff_karma: true, _id: false }).sort({ diff_karma: -1 }).limit(10).toArray()
 
+// Самые положительные голосовальщики в кармы в этом году:
+// db.karma.aggregate([
+//   { $match: { changed: { $gte: 1609459200 } } },
+//   { $group: { _id: '$from', sum: { $sum: '$vote' } } },
+//   { $sort: { sum: -1 } },
+//   { $limit: 10 }
+// ]).toArray()
+
+
+// Самые отрицательные голосователи в кармы в этом году:
+// db.karma.aggregate([
+//   { $match: { changed: { $gte: 1609459200 } } },
+//   { $group: { _id: '$from', sum: { $sum: '$vote' } } },
+//   { $sort: { sum: 1 } },
+//   { $limit: 10 }
+// ]).toArray()
+
 // Приобрели подписчиков:
 // db.diffs.find({}, { new_login: 1, diff_subscribers_count: 1, _id: false }).sort({ diff_subscribers_count: -1 }).limit(10).toArray()
 
