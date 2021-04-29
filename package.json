@@ -20,7 +20,8 @@
     "karma": "ts-node tools/karma.ts",
     "maintenance:cache:db": "ts-node maintenance/toDb.ts",
     "maintenance:cache:json": "ts-node maintenance/toJson.ts",
-    "maintenance:cache:upload": "python3 maintenance/upload.py"
+    "maintenance:cache:upload": "python3 maintenance/upload.py",
+    "experiments:notes": "ts-node experiments/notes.ts"
   },
   "repository": {
     "type": "git",
