@@ -1,7 +1,8 @@
 import * as Iterators from '../src/iterators';
 import {save} from '../src/fs';
-import {Vote, VoteRecord, VoterRecord} from '../src/types';
+import {Post, Vote, VoteRecord, VoterRecord} from '../src/types';
 import * as prompt from 'async-prompt';
+import fetch from 'node-fetch';
 
 require('dotenv').config();
 
@@ -36,9 +37,94 @@ function addVoteToObject(vote: Vote) {
   voters[vote.user.login] ? update() : insert();
 }
 
+const postIds = new Set();
+
+async function savePostWithComments(postId: number, userName: string) {
+  if (postIds.has(postId)) {
+    return;
+  }
+
+  postIds.add(postId);
+
+  try {
+    const post = await (await fetch(`https://d3.ru/api/posts/${postId}`)).json() as Post;
+    const comments = (await (await fetch(`https://d3.ru/api/posts/${postId}/comments`)).json())['comments']
+      .map((c: any) => {
+        c.user = c.user.login;
+        c.url = `https://d3.ru/${postId}/#${c.id}`;
+
+        delete c.can_ban;
+        delete c.can_delete;
+        delete c.can_edit;
+        delete c.can_moderate;
+        delete c.can_remove_comment_threads;
+        delete c.country_code;
+        delete c.country_code;
+        delete c.date_order;
+        delete c.deleted;
+        delete c.hidden_rating_time_to_show;
+        delete c.rating_order;
+        delete c.unread;
+        delete c.user_vote;
+        delete c.vote_weight;
+
+        c.datetime = new Date(c.created * 1000).toISOString();
+
+        return c;
+      });
+
+    comments.sort((a, b) => {
+      return a.created > b.created ? 1 : -1;
+    })
+
+    const result: any = {...post, comments: comments};
+    result.user = post.user.login;
+    result.domain = post.domain.prefix;
+
+    delete result._links;
+    delete result.advertisment;
+    delete result.can_change_render_type;
+    delete result.can_comment;
+    delete result.can_comment;
+    delete result.can_edit;
+    delete result.can_moderate;
+    delete result.can_unpublish;
+    delete result.country_code;
+    delete result.country_code;
+    delete result.estimate;
+    delete result.has_subscribed;
+    delete result.hidden_rating_time_to_show;
+    delete result.in_favourites;
+    delete result.in_interests;
+    delete result.unread_comments_count;
+    delete result.user_vote;
+    delete result.user_vote;
+    delete result.views_count;
+    delete result.vote_weight;
+
+    if (result.data.type === 'stream') {
+      result.data.contributors.forEach((c => {
+        delete c.karma;
+        delete c.is_golden;
+      }))
+      result.data.events.forEach(e => e.user = e.user.login);
+    }
+
+    save(
+      result,
+      `${process.env.DATA}/${userName}/${new Date(post.created * 1000).toISOString().substring(0, 19).replace(/-/g, ".").replace(/:/g, ".")}@${post.domain.prefix}(id${post.id}).json`
+    );
+  }
+  catch (error) {
+    console.error(postId, error);
+  }
+}
+
 (async function () {
   const userName = process.argv[2] ?? (await prompt('username: '));
+
   for await (const comment of Iterators.comments(userName)) {
+    await savePostWithComments(comment.post.id, userName);
     // comments
     for await (const vote of Iterators.commentVotes(comment.id)) {
       const record: VoteRecord = {
@@ -71,6 +157,7 @@ function addVoteToObject(vote: Vote) {
   }
 
   for await (const post of Iterators.posts(userName)) {
+    await savePostWithComments(post.id, userName);
     // posts
     for await (const vote of Iterators.postVotes(post.id)) {
       const record: VoteRecord = {
@@ -100,7 +187,7 @@ function addVoteToObject(vote: Vote) {
 
       addVoteToObject(vote);
     }
-  }
+ }
 
   votes.sort((a, b) => (a.changed > b.changed ? -1 : 1));
   await save(votes, `${process.env.DATA}/${userName}-votes.json`);
