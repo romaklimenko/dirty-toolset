@@ -184,7 +184,6 @@ console.log(newUsers.length);
 //   { $limit: 10 }
 // ]).toArray()
 
-
 // Самые отрицательные голосователи в кармы в этом году:
 // db.karma.aggregate([
 //   { $match: { changed: { $gte: 1609459200 } } },

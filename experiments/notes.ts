@@ -1,6 +1,6 @@
 import * as prompt from 'async-prompt';
-import { Db } from '../src/db';
-import { note } from '../src/notes';
+import {Db} from '../src/db';
+import {note} from '../src/notes';
 
 require('dotenv').config();
 
@@ -17,7 +17,7 @@ function epochToDate(epoch: number) {
   const users = await db.users();
   const notes = await db.notes();
 
-  for await (const user of users.find({ 'dude.id': { '$gte': from, '$lte': to } })) {
+  for await (const user of users.find({'dude.id': {$gte: from, $lte: to}})) {
     console.log(user.dude.id, user.dude.login);
     const n = await note(user.dude.login, process.env.USERNAME);
     if (n) {
@@ -37,5 +37,4 @@ function epochToDate(epoch: number) {
   }
 
   await db.close();
-
 })().catch(console.error);

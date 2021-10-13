@@ -28,7 +28,6 @@ import {save} from '../src/fs';
         to: v.to,
         changed: v.changed,
         vote: v.vote,
-        deleted: v.deleted,
       };
     });
 

@@ -47,9 +47,14 @@ async function savePostWithComments(postId: number, userName: string) {
   postIds.add(postId);
 
   try {
-    const post = await (await fetch(`https://d3.ru/api/posts/${postId}`)).json() as Post;
-    const comments = (await (await fetch(`https://d3.ru/api/posts/${postId}/comments`)).json())['comments']
-      .map((c: any) => {
+    const post = (await (
+      await fetch(`https://d3.ru/api/posts/${postId}`)
+    ).json()) as Post;
+    const comments = (
+      await (await fetch(`https://d3.ru/api/posts/${postId}/comments`)).json()
+    )['comments'].map(
+      // eslint-disable-next-line
+      (c: any) => {
         c.user = c.user.login;
         c.url = `https://d3.ru/${postId}/#${c.id}`;
 
@@ -71,12 +76,14 @@ async function savePostWithComments(postId: number, userName: string) {
         c.datetime = new Date(c.created * 1000).toISOString();
 
         return c;
-      });
+      }
+    );
 
     comments.sort((a, b) => {
       return a.created > b.created ? 1 : -1;
-    })
+    });
 
+    // eslint-disable-next-line
     const result: any = {...post, comments: comments};
     result.user = post.user.login;
     result.domain = post.domain.prefix;
@@ -103,19 +110,22 @@ async function savePostWithComments(postId: number, userName: string) {
     delete result.vote_weight;
 
     if (result.data.type === 'stream') {
-      result.data.contributors.forEach((c => {
+      result.data.contributors.forEach(c => {
         delete c.karma;
         delete c.is_golden;
-      }))
-      result.data.events.forEach(e => e.user = e.user.login);
+      });
+      result.data.events.forEach(e => (e.user = e.user.login));
     }
 
     save(
       result,
-      `${process.env.DATA}/${userName}/${new Date(post.created * 1000).toISOString().substring(0, 19).replace(/-/g, ".").replace(/:/g, ".")}@${post.domain.prefix}(id${post.id}).json`
+      `${process.env.DATA}/${userName}/${new Date(post.created * 1000)
+        .toISOString()
+        .substring(0, 19)
+        .replace(/-/g, '.')
+        .replace(/:/g, '.')}@${post.domain.prefix}(id${post.id}).json`
     );
-  }
-  catch (error) {
+  } catch (error) {
     console.error(postId, error);
   }
 }
@@ -187,7 +197,7 @@ async function savePostWithComments(postId: number, userName: string) {
 
       addVoteToObject(vote);
     }
- }
+  }
 
   votes.sort((a, b) => (a.changed > b.changed ? -1 : 1));
   await save(votes, `${process.env.DATA}/${userName}-votes.json`);

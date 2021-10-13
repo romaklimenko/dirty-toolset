@@ -75,8 +75,6 @@ export interface KarmaSchema extends MongoDocument {
   changed: number;
   date: string;
   vote: number;
-  checked: string;
-  deleted: boolean;
 }
 
 export interface UserDiffSchema {
@@ -109,7 +107,6 @@ export interface UserDiffSchema {
   new_active: number | null;
   active_changed: boolean;
 }
-
 
 export interface NoteSchema extends MongoDocument, NoteResponse {
   author: string;

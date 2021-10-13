@@ -102,7 +102,10 @@ function pushBatch(votes: VoteRecord[], batches: Batch[]) {
 }
 
 function batchToString(batch: Batch, verbose = false) {
-  const avgDelayInSec = Math.round((batch.votes[batch.votes.length - 1].changed - batch.votes[0].changed) / batch.votes.length);
+  const avgDelayInSec = Math.round(
+    (batch.votes[batch.votes.length - 1].changed - batch.votes[0].changed) /
+      batch.votes.length
+  );
   let result = `${batch.votes[0].voter}, count: ${batch.count}, sum: ${batch.sum}, mean: ${batch.diffInDays.mean}d, median: ${batch.diffInDays.median}d, pace: ${avgDelayInSec}s/vote`;
 
   if (verbose) {

@@ -2,7 +2,6 @@ import {Db, UserSchema, KarmaSchema} from '../src/db';
 import {UserErrorResponse} from '../src/types';
 import {getUser} from '../src/ajax';
 import {karma} from '../src/iterators';
-import {note} from '../src/notes';
 
 const fromId: number = parseInt(process.argv[2], 10) || 1;
 const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
@@ -28,7 +27,6 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
       if (response.dude.login === '') {
         continue;
       }
-      const checked = new Date().toISOString().substr(0, 10);
       for await (const vote of karma(response.dude.login)) {
         // этот документ мы запишем
         const doc: KarmaSchema = {
@@ -39,20 +37,7 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
           vote: vote.vote,
           changed: vote.changed,
           date: new Date(vote.changed * 1000).toISOString().substr(0, 10),
-          checked: checked,
-          deleted: false,
         };
-        // но сначала мы пометим как удаленный, предыдущий голос (если был)
-        await karmas.updateMany(
-          {
-            fromId: doc.fromId,
-            toId: doc.toId,
-            vote: doc.vote,
-            changed: {$ne: doc.changed},
-            deleted: false,
-          },
-          {$set: {deleted: true}}
-        );
 
         try {
           // если голос уже записан,
@@ -62,7 +47,6 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
               toId: doc.toId,
               changed: doc.changed,
               vote: doc.vote,
-              deleted: false,
             },
             {$set: doc}, // перезапишем с новым checked
             {upsert: true} // или запишем новый голос
@@ -72,17 +56,6 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
         }
       }
 
-      // все последние голоса в карму пользователя записаны,
-      // отмечаем как удаленные те голоса, которые не были только что обновлены
-      await karmas.updateMany(
-        {
-          toId: response.dude.id,
-          checked: {$ne: checked},
-          deleted: false,
-        },
-        {$set: {deleted: true}}
-      );
-      
       const doc: UserSchema = {
         _id: response.dude.login,
         status: response.status,
@@ -99,7 +72,7 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
           id: response.dude.id,
         },
         comments_count: response.comments_count,
-        posts_count: response.posts_count
+        posts_count: response.posts_count,
       };
       await users.insertOne(doc);
     } else {
