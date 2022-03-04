@@ -134,7 +134,7 @@ async function savePostWithComments(postId: number, userName: string) {
   const userName = process.argv[2] ?? (await prompt('username: '));
 
   for await (const comment of Iterators.comments(userName)) {
-    await savePostWithComments(comment.post.id, userName);
+    // await savePostWithComments(comment.post.id, userName);
     // comments
     for await (const vote of Iterators.commentVotes(comment.id)) {
       const record: VoteRecord = {
@@ -167,7 +167,7 @@ async function savePostWithComments(postId: number, userName: string) {
   }
 
   for await (const post of Iterators.posts(userName)) {
-    await savePostWithComments(post.id, userName);
+    // await savePostWithComments(post.id, userName);
     // posts
     for await (const vote of Iterators.postVotes(post.id)) {
       const record: VoteRecord = {
