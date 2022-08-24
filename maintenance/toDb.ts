@@ -2,6 +2,7 @@ import {Db, UserSchema, KarmaSchema} from '../src/db';
 import {UserErrorResponse} from '../src/types';
 import {getUser} from '../src/ajax';
 import {karma} from '../src/iterators';
+import * as retry from 'async-retry';
 
 const fromId: number = parseInt(process.argv[2], 10) || 1;
 const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
@@ -21,7 +22,17 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
       errortsLeft = maxErrors;
       continue;
     }
-    const response = await getUser(userId);
+
+    const response = await retry(
+      async () => await getUser(userId),
+      {
+        retries: 5,
+        // minTimeout: 60 * 1000,
+        maxTimeout: 60 * 1000,
+        onRetry: (error, attemptNumber) => console.error('retry:', new Date(), error, attemptNumber)
+      }
+    );
+
     if (response.status === 'OK') {
       errortsLeft = maxErrors;
       console.log(userId, response.dude.login);
