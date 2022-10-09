@@ -23,8 +23,9 @@ export class Db {
   async users() {
     const collection = this.db().collection<UserSchema>('users');
     await collection.createIndexes([
-      {key: {'dude.login': 1}, unique: true},
-      {key: {'dude.id': 1}, unique: true},
+      {key: {'dude.login': 1}, unique: false},
+      {key: {'dude.id': 1}, unique: false},
+      {key: {'fetched': 1}, unique: false},
     ]);
     return collection;
   }
@@ -65,6 +66,7 @@ export interface MongoDocument {
 
 export interface UserSchema extends UserResponse {
   _id: string;
+  fetched: number;
 }
 
 export interface KarmaSchema extends MongoDocument {

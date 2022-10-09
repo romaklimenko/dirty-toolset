@@ -17,10 +17,15 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
   let errortsLeft = maxErrors;
 
   for (let userId = fromId; userId < toId && errortsLeft > 0; userId++) {
-    if (await users.findOne({'dude.id': userId})) {
-      console.log(`User ID ${userId} is already processed.`);
-      errortsLeft = maxErrors;
-      continue;
+    if (Math.random() < 0.10) {
+      // с вероятностью 10% не пропускать недавно обновленных пользователей
+    } else {
+      const fetchedUser = await users.findOne({'dude.id': userId, fetched: { $exists: true }});
+      if (fetchedUser && fetchedUser.fetched > (+new Date() / 1000 - 24 * 7 * 60 * 60)) {
+        console.log(`User ID ${userId} is recently processed.`);
+        errortsLeft = maxErrors;
+        continue;
+      }
     }
 
     const response = await retry(
@@ -85,8 +90,9 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
         },
         comments_count: response.comments_count,
         posts_count: response.posts_count,
+        fetched: Math.floor(+new Date() / 1000)
       };
-      await users.insertOne(doc);
+      await users.replaceOne({ _id: doc._id }, doc, { upsert: true });
     } else {
       console.log(
         userId,
