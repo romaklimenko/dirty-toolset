@@ -11,20 +11,30 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
   const db = new Db();
   await db.connect();
   const users = await db.users();
+  const usersErrors = await db.usersErrors();
   const karmas = await db.karma();
 
   const maxErrors = 1000;
   let errortsLeft = maxErrors;
 
+  const maxUserId = (await users.findOne({}, { sort: [ [ 'dude.id', -1 ] ] }))?.dude.id ?? 0;
+
   for (let userId = fromId; userId < toId && errortsLeft > 0; userId++) {
+    const fetchedLimit = +new Date() / 1000 - 24 * 7 * 60 * 60;
     if (Math.random() < 0.10) {
       // с вероятностью 10% не пропускать недавно обновленных пользователей
     } else {
-      const fetchedUser = await users.findOne({'dude.id': userId, fetched: { $exists: true }});
-      if (fetchedUser && fetchedUser.fetched > (+new Date() / 1000 - 24 * 7 * 60 * 60)) {
+      if (await users.findOne({'dude.id': userId, fetched: { $gt: fetchedLimit }})) {
         console.log(`User ID ${userId} is recently processed.`);
         errortsLeft = maxErrors;
         continue;
+      }
+      if (userId < maxUserId) {
+        if (await usersErrors.findOne({ _id: userId, fetched: { $gt: fetchedLimit } })) {
+          console.log(`User ID ${userId} was recently checked and errored.`);
+          errortsLeft = maxErrors;
+          continue;
+        }
       }
     }
 
@@ -94,9 +104,14 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
       };
       await users.replaceOne({ _id: doc._id }, doc, { upsert: true });
     } else {
+      const errorResponse = response as UserErrorResponse;
+      await usersErrors.replaceOne(
+        { _id: userId },
+        { ...errorResponse, fetched: Math.floor(+new Date() / 1000) },
+        { upsert: true });
       console.log(
         userId,
-        (response as UserErrorResponse).errors,
+        errorResponse.errors,
         --errortsLeft,
         'errors left'
       );

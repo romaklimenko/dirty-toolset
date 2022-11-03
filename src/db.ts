@@ -1,5 +1,5 @@
 import {MongoClient, ObjectId} from 'mongodb';
-import {Gender, NoteResponse, UserResponse} from './types';
+import {Gender, NoteResponse, UserErrorResponse, UserResponse} from './types';
 
 export class Db {
   private client: MongoClient;
@@ -25,6 +25,14 @@ export class Db {
     await collection.createIndexes([
       {key: {'dude.login': 1}, unique: false},
       {key: {'dude.id': 1}, unique: false},
+      {key: {'fetched': 1}, unique: false},
+    ]);
+    return collection;
+  }
+
+  async usersErrors() {
+    const collection = this.db().collection<UserErrorResponse & { fetched: number }>('users_errors');
+    await collection.createIndexes([
       {key: {'fetched': 1}, unique: false},
     ]);
     return collection;
