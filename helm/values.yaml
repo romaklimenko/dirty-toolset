@@ -1,0 +1,19 @@
+image:
+  repository: "romaklimenko.azurecr.io/dirty-toolset"
+  tag: "latest"
+
+imagePullSecrets:
+- "acr-pull"
+
+accountKeySecret: "account-key"
+dirtyCredentialsSecret: "dirty-credentials"
+
+mongo: "mongodb://mongodb:27017/dirty"
+
+dirty:
+  uid: ""
+  sid: ""
+
+users:
+  schedule: "0 12 * * *"
+  ttlSecondsAfterFinished: 3600

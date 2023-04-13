@@ -3,6 +3,7 @@ import requests
 import sys
 import time
 
+
 class Activities:
     def __init__(self, username, activity_type='comments', uid=None, sid=None):
         self.activity_type = activity_type
@@ -25,15 +26,18 @@ class Activities:
         else:
             raise StopIteration()
 
+
 class Comments(Activities):
     def __init__(self, username, uid=None, sid=None):
         Activities.__init__(self, username, 'comments', uid, sid)
+
 
 class Posts(Activities):
     def __init__(self, username, uid=None, sid=None):
         Activities.__init__(self, username, 'posts', uid, sid)
 
-# 
+#
+
 
 from_id = 0
 to_id = 300000
@@ -49,6 +53,7 @@ url = 'https://d3.ru/ajax/user/get/'
 
 max_errors = 250
 errors = 0
+
 
 def cache_activity(activity, cache):
     if 'created' in activity and 'rating' in activity and activity['created'] <= time_limit:
@@ -66,12 +71,13 @@ def cache_activity(activity, cache):
 for id in range(from_id, to_id):
     if errors > max_errors:
         break
-    user = requests.post(url, data={ 'id': id }).json()
+    user = requests.post(url, data={'id': id}).json()
     if user['status'] == 'OK':
         errors = 0
         print('id:', id, 'user:', user['dude']['login'])
         if (user['comments_count'] > activities_limit or user['posts_count'] > activities_limit):
-            print(f' posts: {user["posts_count"]}, comments: {user["comments_count"]}')
+            print(
+                f' posts: {user["posts_count"]}, comments: {user["comments_count"]}')
 
             cached_posts = list()
             for posts in Posts(user['dude']['login']):
@@ -94,8 +100,10 @@ for id in range(from_id, to_id):
             }
 
             with open(f'blobs/{user["dude"]["login"].lower()}.json', 'w') as file:
-                json.dump(cache, file, ensure_ascii=False, separators=(',',':'))
+                json.dump(cache, file, ensure_ascii=False,
+                          separators=(',', ':'))
 
     else:
         errors += 1
-        print('id:', id, 'error:', user['errors'][0]['code'], 'errors left:', max_errors - errors)
+        print('id:', id, 'error:', user['errors'][0]
+              ['code'], 'errors left:', max_errors - errors)

@@ -28,27 +28,28 @@ karma_collection = db['karma']
 
 print('from', from_id, 'to', to_id)
 
-for user in users_collection.find({ 'dude.id': { '$gte': from_id, '$lte': to_id } }):
-  print(user['dude']['id'], user['dude']['login'])
-  totals = np.fromiter(map(lambda x: int(x['total_count_from']), list(karma_collection.find({ 'to': user['dude']['login'] }))), dtype=np.int)
+for user in users_collection.find({'dude.id': {'$gte': from_id, '$lte': to_id}}):
+    print(user['dude']['id'], user['dude']['login'])
+    totals = np.fromiter(map(lambda x: int(x['total_count_from']), list(
+        karma_collection.find({'to': user['dude']['login']}))), dtype=np.int)
 
-  count = len(totals)
-  zeros = count - np.count_nonzero(totals)
-  zero_perc = 0
-  if count != 0:
-    zero_perc = zeros / count
+    count = len(totals)
+    zeros = count - np.count_nonzero(totals)
+    zero_perc = 0
+    if count != 0:
+        zero_perc = zeros / count
 
-  stats = {
-    'count': len(totals),
-    'mean': np.mean(totals),
-    'median': np.median(totals),
-    'std': np.std(totals),
-    'zeros': len(totals) - np.count_nonzero(totals),
-    'zero_perc': zero_perc
-  }
+    stats = {
+        'count': len(totals),
+        'mean': np.mean(totals),
+        'median': np.median(totals),
+        'std': np.std(totals),
+        'zeros': len(totals) - np.count_nonzero(totals),
+        'zero_perc': zero_perc
+    }
 
-  print(stats)
+    print(stats)
 
-  user['stats'] = stats
+    user['stats'] = stats
 
-  users_collection.save(user)
+    users_collection.save(user)

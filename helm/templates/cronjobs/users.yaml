@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: users
+  labels:
+    {{- include "labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.users.schedule | quote }}
+  jobTemplate:
+    spec:
+      ttlSecondsAfterFinished: {{ .Values.users.ttlSecondsAfterFinished }}
+      template:
+        spec:
+          containers:
+            - name: users
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default "latest" }}"
+              imagePullPolicy: Always
+              env:
+              - name: PYTHONUNBUFFERED
+                value: "true"
+              - name: MONGO
+                value: "{{ .Values.mongo }}"
+              - name: GOOGLE_APPLICATION_CREDENTIALS
+                value: /etc/account-key/account-key.json
+              - name: UID
+                valueFrom:
+                  secretKeyRef:
+                    name: {{.Values.dirtyCredentialsSecret}}
+                    key: uid
+              - name: SID
+                valueFrom:
+                  secretKeyRef:
+                    name: {{.Values.dirtyCredentialsSecret}}
+                    key: sid
+              volumeMounts:
+              - name: account-key
+                mountPath: "/etc/account-key"
+                readOnly: true
+              command:
+                - "/bin/sh"
+                - "-c"
+                - "./jobs/users.sh"
+          volumes:
+          - name: account-key
+            secret:
+              secretName: "{{ .Values.accountKeySecret }}"
+          restartPolicy: Never
+          {{- if (not (empty .Values.imagePullSecrets)) }}
+          imagePullSecrets:
+            {{- range .Values.imagePullSecrets }}
+            - name: {{ . | quote }}
+            {{- end }}
+          {{ end }}
+      backoffLimit: 1

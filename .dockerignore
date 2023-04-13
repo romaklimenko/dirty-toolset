@@ -3,5 +3,8 @@
 account-key.json
 build
 cache
+commands
 coverage
+Dockerfile
 node_modules
+README.md

@@ -1,7 +1,10 @@
 import os
 from google.cloud import storage
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'dirty.json'
+if 'GOOGLE_APPLICATION_CREDENTIALS' not in os.environ and os.path.exists('account-key.json'):
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.abspath(
+        'account-key.json')
+
 cache_dir = 'cache'
 
 client = storage.Client()
