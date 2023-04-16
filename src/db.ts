@@ -31,7 +31,7 @@ export class Db {
   }
 
   async usersErrors() {
-    const collection = this.db().collection<UserErrorResponse & { fetched: number }>('users_errors');
+    const collection = this.db().collection<UserErrorResponse & { _id: number, fetched: number }>('users_errors');
     await collection.createIndexes([
       {key: {'fetched': 1}, unique: false},
     ]);

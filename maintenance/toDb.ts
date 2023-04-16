@@ -1,7 +1,7 @@
-import {Db, UserSchema, KarmaSchema} from '../src/db';
-import {UserErrorResponse} from '../src/types';
-import {getUser} from '../src/ajax';
-import {karma} from '../src/iterators';
+import { Db, UserSchema, KarmaSchema } from '../src/db';
+import { UserErrorResponse } from '../src/types';
+import { getUser } from '../src/ajax';
+import { karma } from '../src/iterators';
 import * as retry from 'async-retry';
 
 const fromId: number = parseInt(process.argv[2], 10) || 1;
@@ -17,25 +17,28 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
   const maxErrors = 1000;
   let errortsLeft = maxErrors;
 
-  const maxUserId = (await users.findOne({}, { sort: [ [ 'dude.id', -1 ] ] }))?.dude.id ?? 0;
+  const idsToSkip = new Set<number>();
+
+  const fetchedLimit = +new Date() / 1000 - 24 * 7 * 60 * 60;
+
+  const forceFetchProbability = 1 / 25;
+
+  for await (const user of users.find({ fetched: { $gt: fetchedLimit } }).project({ dude: { id: 1 } })) {
+    if (Math.random() > forceFetchProbability) {
+      idsToSkip.add(user.dude.id);
+    }
+  }
+
+  for await (const error of usersErrors.find({ fetched: { $gt: fetchedLimit } }).project({ _id: 1 })) {
+    if (Math.random() > forceFetchProbability) {
+      idsToSkip.add(error._id);
+    }
+  }
 
   for (let userId = fromId; userId < toId && errortsLeft > 0; userId++) {
-    const fetchedLimit = +new Date() / 1000 - 24 * 7 * 60 * 60;
-    if (Math.random() < 0.10) {
-      // с вероятностью 10% не пропускать недавно обновленных пользователей
-    } else {
-      if (await users.findOne({'dude.id': userId, fetched: { $gt: fetchedLimit }})) {
-        console.log(`User ID ${userId} is recently processed.`);
-        errortsLeft = maxErrors;
-        continue;
-      }
-      if (userId < maxUserId) {
-        if (await usersErrors.findOne({ _id: userId, fetched: { $gt: fetchedLimit } })) {
-          console.log(`User ID ${userId} was recently checked and errored.`);
-          errortsLeft = maxErrors;
-          continue;
-        }
-      }
+    if (idsToSkip.has(userId)) {
+      idsToSkip.delete(userId);
+      continue;
     }
 
     const response = await retry(
@@ -50,8 +53,12 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
 
     if (response.status === 'OK') {
       errortsLeft = maxErrors;
-      console.log(userId, response.dude.login);
+      console.log('id:', userId, 'login:', response.dude.login);
       if (response.dude.login === '') {
+        await usersErrors.replaceOne(
+          { _id: userId },
+          { status: 'ERR', errors: [{ code: 'empty login' }], _id: userId, fetched: Math.floor(+new Date() / 1000) },
+          { upsert: true });
         continue;
       }
       for await (const vote of karma(response.dude.login)) {
@@ -75,8 +82,8 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
               changed: doc.changed,
               vote: doc.vote,
             },
-            {$set: doc}, // перезапишем с новым checked
-            {upsert: true} // или запишем новый голос
+            { $set: doc }, // перезапишем с новым checked
+            { upsert: true } // или запишем новый голос
           );
         } catch (error) {
           console.log(error);
@@ -107,7 +114,7 @@ const toId: number = parseInt(process.argv[3], 10) || Number.MAX_SAFE_INTEGER;
       const errorResponse = response as UserErrorResponse;
       await usersErrors.replaceOne(
         { _id: userId },
-        { ...errorResponse, fetched: Math.floor(+new Date() / 1000) },
+        { ...errorResponse, _id: userId, fetched: Math.floor(+new Date() / 1000) },
         { upsert: true });
       console.log(
         userId,
